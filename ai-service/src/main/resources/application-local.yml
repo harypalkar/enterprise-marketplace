@@ -1,0 +1,16 @@
+﻿spring:
+  jpa:
+    show-sql: true
+
+springdoc:
+  swagger-ui:
+    enabled: true
+
+logging:
+  level:
+    com.enterprise.marketplace: DEBUG
+
+management:
+  endpoint:
+    health:
+      show-details: always

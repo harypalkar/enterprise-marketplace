@@ -1,0 +1,96 @@
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+.factorypath
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+logs/
+*.log
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.jks
+secrets/
+credentials/
+
+# Docker
+docker/volumes/
+docker/data/
+
+# Terraform
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/*.tfvars
+!terraform/*.tfvars.example
+terraform/crash.log
+terraform/override.tf
+terraform/*_override.tf
+
+# Kubernetes / Helm
+kubernetes/secrets/
+helm/charts/*/charts/
+
+# Test & coverage
+*.exec
+.jacoco/
+coverage/
+test-output/
+
+# Build artifacts
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+*.war
+*.ear
+*.class
+
+# Local overrides
+application-local-override.yml
+**/application-local-override.yml
+
+# Ollama / AI models
+models/
+*.gguf
+
+# Elasticsearch data
+es-data/
+
+# Redis dump
+dump.rdb
+
+# Temporary
+tmp/
+temp/
+*.tmp
+*.bak

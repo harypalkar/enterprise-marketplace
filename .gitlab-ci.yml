@@ -1,0 +1,3 @@
+.gitlab-ci.yml placeholder — use GitLab CI in production pipeline.
+
+See Jenkinsfile for alternative CI pipeline definition.

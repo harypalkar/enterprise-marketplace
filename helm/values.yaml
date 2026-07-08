@@ -1,0 +1,79 @@
+# Default values for marketplace-platform.
+# Override per environment using values-dev.yaml, values-qa.yaml, values-prod.yaml
+
+global:
+  imageRegistry: registry.gitlab.com/enterprise-marketplace
+  imagePullPolicy: IfNotPresent
+  environment: local
+
+gateway:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: gateway-service
+    tag: "1.0.0-SNAPSHOT"
+  service:
+    type: ClusterIP
+    port: 8080
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 250m
+    limits:
+      memory: 1Gi
+      cpu: 500m
+
+services:
+  identity-service:
+    enabled: true
+    port: 8081
+  product-service:
+    enabled: true
+    port: 8082
+  seller-service:
+    enabled: true
+    port: 8083
+  buyer-service:
+    enabled: true
+    port: 8084
+  category-service:
+    enabled: true
+    port: 8085
+  inventory-service:
+    enabled: true
+    port: 8086
+  pricing-service:
+    enabled: true
+    port: 8087
+  workflow-service:
+    enabled: true
+    port: 8088
+  notification-service:
+    enabled: true
+    port: 8089
+  search-service:
+    enabled: true
+    port: 8090
+  ai-service:
+    enabled: true
+    port: 8091
+  audit-service:
+    enabled: true
+    port: 8092
+  subscription-service:
+    enabled: true
+    port: 8093
+  report-service:
+    enabled: true
+    port: 8094
+  admin-service:
+    enabled: true
+    port: 8095
+
+observability:
+  prometheus:
+    enabled: false
+  grafana:
+    enabled: false
+  jaeger:
+    enabled: false

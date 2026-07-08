@@ -1,0 +1,76 @@
+# Application YAML templates for microservices
+# Replace {{SERVICE_NAME}} and {{PORT}} when creating new services.
+
+spring:
+  application:
+    name: {{SERVICE_NAME}}
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    default-property-inclusion: non_null
+  datasource:
+    url: ${NEON_DB_URL:jdbc:postgresql://localhost:5432/{{SERVICE_NAME}}}
+    username: ${NEON_DB_USER:marketplace}
+    password: ${NEON_DB_PASSWORD:marketplace}
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      pool-name: {{SERVICE_NAME}}-pool
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: false
+
+server:
+  port: {{PORT}}
+  shutdown: graceful
+  error:
+    include-message: never
+    include-binding-errors: never
+    include-stacktrace: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: when_authorized
+  metrics:
+    tags:
+      application: ${spring.application.name}
+  tracing:
+    sampling:
+      probability: ${TRACING_SAMPLING_PROBABILITY:1.0}
+  otlp:
+    tracing:
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4318/v1/traces}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: false
+
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{correlationId:-},%X{requestId:-}]"
+  level:
+    root: INFO
+    com.enterprise.marketplace: INFO
+
+marketplace:
+  service:
+    name: {{SERVICE_NAME}}

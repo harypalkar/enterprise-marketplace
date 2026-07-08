@@ -1,0 +1,2 @@
+com.enterprise.marketplace.common.config.CommonLibraryAutoConfiguration
+com.enterprise.marketplace.common.config.JpaAuditingAutoConfiguration

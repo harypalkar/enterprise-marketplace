@@ -1,0 +1,22 @@
+# Kubernetes Manifests
+#
+# Bootstrap placeholder. Full manifests will be added in deployment milestone.
+#
+# Planned structure:
+# kubernetes/
+# ├── base/                  # Kustomize base
+# │   ├── namespace.yaml
+# │   ├── gateway/
+# │   └── services/
+# └── overlays/
+#     ├── dev/
+#     ├── qa/
+#     └── prod/
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: marketplace
+  labels:
+    app.kubernetes.io/part-of: enterprise-marketplace
+    app.kubernetes.io/managed-by: kustomize
