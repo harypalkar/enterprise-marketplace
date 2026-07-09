@@ -1,9 +1,13 @@
 ﻿spring:
-  jpa:
-    show-sql: true
+  elasticsearch:
+    uris: ${ELASTICSEARCH_URIS:http://localhost:9200}
 
 springdoc:
   swagger-ui:
+    enabled: true
+
+marketplace:
+  elasticsearch:
     enabled: true
 
 logging:
@@ -14,3 +18,6 @@ management:
   endpoint:
     health:
       show-details: always
+      group:
+        readiness:
+          include: readinessState,ping,elasticsearch

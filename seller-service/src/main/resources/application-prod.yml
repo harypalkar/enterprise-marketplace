@@ -1,8 +1,30 @@
 ﻿springdoc:
   swagger-ui:
     enabled: false
-  api-docs:
-    enabled: false
+
+spring:
+  datasource:
+    url: ${NEON_DB_URL}
+    username: ${NEON_DB_USER}
+    password: ${NEON_DB_PASSWORD}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI}
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI}
+
+marketplace:
+  security:
+    enabled: true
+
+management:
+  endpoint:
+    health:
+      show-details: never
+  tracing:
+    sampling:
+      probability: 0.1
 
 logging:
   level:

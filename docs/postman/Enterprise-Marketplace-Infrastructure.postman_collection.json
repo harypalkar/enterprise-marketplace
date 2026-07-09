@@ -1,0 +1,174 @@
+{
+  "info": {
+    "name": "Enterprise Marketplace - Infrastructure Health",
+    "description": "Infrastructure foundation health and actuator endpoints for the Enterprise Marketplace Platform.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "gatewayBaseUrl", "value": "http://localhost:8080" },
+    { "key": "identityBaseUrl", "value": "http://localhost:8081" },
+    { "key": "searchBaseUrl", "value": "http://localhost:8090" },
+    { "key": "aiBaseUrl", "value": "http://localhost:8091" },
+    { "key": "correlationId", "value": "00000000-0000-4000-8000-000000000001" },
+    { "key": "requestId", "value": "00000000-0000-4000-8000-000000000002" }
+  ],
+  "item": [
+    {
+      "name": "Gateway",
+      "item": [
+        {
+          "name": "Gateway Health",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Correlation-Id", "value": "{{correlationId}}" },
+              { "key": "X-Request-Id", "value": "{{requestId}}" }
+            ],
+            "url": "{{gatewayBaseUrl}}/actuator/health"
+          }
+        },
+        {
+          "name": "Gateway Info",
+          "request": {
+            "method": "GET",
+            "url": "{{gatewayBaseUrl}}/actuator/info"
+          }
+        },
+        {
+          "name": "Gateway Prometheus",
+          "request": {
+            "method": "GET",
+            "url": "{{gatewayBaseUrl}}/actuator/prometheus"
+          }
+        },
+        {
+          "name": "Gateway Swagger UI",
+          "request": {
+            "method": "GET",
+            "url": "{{gatewayBaseUrl}}/swagger-ui.html"
+          }
+        },
+        {
+          "name": "Gateway OpenAPI Docs",
+          "request": {
+            "method": "GET",
+            "url": "{{gatewayBaseUrl}}/v3/api-docs"
+          }
+        },
+        {
+          "name": "Gateway Bootstrap Health",
+          "request": {
+            "method": "GET",
+            "url": "{{gatewayBaseUrl}}/api/v1/bootstrap/health"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Identity",
+      "item": [
+        {
+          "name": "Identity Health",
+          "request": {
+            "method": "GET",
+            "url": "{{identityBaseUrl}}/actuator/health"
+          }
+        },
+        {
+          "name": "Identity Info",
+          "request": {
+            "method": "GET",
+            "url": "{{identityBaseUrl}}/actuator/info"
+          }
+        },
+        {
+          "name": "Identity Prometheus",
+          "request": {
+            "method": "GET",
+            "url": "{{identityBaseUrl}}/actuator/prometheus"
+          }
+        },
+        {
+          "name": "Identity Swagger UI",
+          "request": {
+            "method": "GET",
+            "url": "{{identityBaseUrl}}/swagger-ui.html"
+          }
+        },
+        {
+          "name": "Identity OpenAPI Docs",
+          "request": {
+            "method": "GET",
+            "url": "{{identityBaseUrl}}/v3/api-docs"
+          }
+        },
+        {
+          "name": "Redis Health",
+          "request": {
+            "method": "GET",
+            "url": "{{identityBaseUrl}}/api/v1/infrastructure/health/redis"
+          }
+        },
+        {
+          "name": "Kafka Health",
+          "request": {
+            "method": "GET",
+            "url": "{{identityBaseUrl}}/api/v1/infrastructure/health/kafka"
+          }
+        },
+        {
+          "name": "Infrastructure Health (Aggregated)",
+          "request": {
+            "method": "GET",
+            "url": "{{identityBaseUrl}}/api/v1/infrastructure/health"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Search",
+      "item": [
+        {
+          "name": "Search Health",
+          "request": {
+            "method": "GET",
+            "url": "{{searchBaseUrl}}/actuator/health"
+          }
+        },
+        {
+          "name": "Elasticsearch Health",
+          "request": {
+            "method": "GET",
+            "url": "{{searchBaseUrl}}/api/v1/infrastructure/health/elasticsearch"
+          }
+        },
+        {
+          "name": "Search OpenAPI Docs",
+          "request": {
+            "method": "GET",
+            "url": "{{searchBaseUrl}}/v3/api-docs"
+          }
+        }
+      ]
+    },
+    {
+      "name": "AI",
+      "item": [
+        {
+          "name": "AI Health",
+          "request": {
+            "method": "GET",
+            "url": "{{aiBaseUrl}}/actuator/health"
+          }
+        },
+        {
+          "name": "Ollama Health",
+          "request": {
+            "method": "GET",
+            "url": "{{aiBaseUrl}}/api/v1/infrastructure/health/ollama"
+          }
+        }
+      ]
+    }
+  ]
+}

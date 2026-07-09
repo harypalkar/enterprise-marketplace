@@ -1,4 +1,4 @@
-package com.enterprise.marketplace.productservice.bootstrap;
+package com.enterprise.marketplace.productservice.controller;
 
 import com.enterprise.marketplace.common.api.ApiResponse;
 import com.enterprise.marketplace.common.context.RequestContext;

@@ -1,3 +1,11 @@
-﻿logging:
-  level:
-    com.enterprise.marketplace: INFO
+﻿marketplace:
+  ollama:
+    base-url: ${OLLAMA_BASE_URL}
+
+management:
+  endpoint:
+    health:
+      show-details: when_authorized
+  tracing:
+    sampling:
+      probability: 0.5

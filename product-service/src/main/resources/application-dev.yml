@@ -1,3 +1,24 @@
-﻿logging:
+﻿spring:
+  datasource:
+    url: ${NEON_DB_URL}
+    username: ${NEON_DB_USER}
+    password: ${NEON_DB_PASSWORD}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI}
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI}
+
+marketplace:
+  security:
+    enabled: true
+
+logging:
   level:
     com.enterprise.marketplace: DEBUG
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0

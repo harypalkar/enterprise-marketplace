@@ -1,0 +1,126 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CanonicalProductRequest",
+  "type": "object",
+  "required": ["header", "requestInfo", "seller", "product", "pricing", "inventory"],
+  "properties": {
+    "header": {
+      "type": "object",
+      "required": ["sourceSystem", "channel", "locale"],
+      "properties": {
+        "sourceSystem": { "type": "string", "minLength": 1 },
+        "channel": { "type": "string", "minLength": 1 },
+        "locale": { "type": "string", "minLength": 1 },
+        "tenantId": { "type": "string" }
+      }
+    },
+    "requestInfo": {
+      "type": "object",
+      "required": ["clientRequestId"],
+      "properties": {
+        "clientRequestId": { "type": "string", "minLength": 1 },
+        "idempotencyKey": { "type": "string" },
+        "correlationId": { "type": "string" },
+        "requestId": { "type": "string" },
+        "requestedBy": { "type": "string" }
+      }
+    },
+    "seller": {
+      "type": "object",
+      "required": ["sellerId"],
+      "properties": {
+        "sellerId": { "type": "string", "format": "uuid" }
+      }
+    },
+    "product": {
+      "type": "object",
+      "required": ["sku", "name"],
+      "properties": {
+        "sku": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" },
+        "categoryId": { "type": "string", "format": "uuid" },
+        "unitOfMeasure": { "type": "string" },
+        "hsnCode": { "type": "string" },
+        "status": { "type": "string", "enum": ["DRAFT", "ACTIVE", "INACTIVE", "ARCHIVED"] }
+      }
+    },
+    "pricing": {
+      "type": "object",
+      "required": ["unitPrice", "currency"],
+      "properties": {
+        "unitPrice": { "type": "number", "minimum": 0 },
+        "currency": { "type": "string", "minLength": 3, "maxLength": 3 },
+        "minQuantity": { "type": "integer", "minimum": 1 },
+        "discountPercent": { "type": "number", "minimum": 0, "maximum": 100 },
+        "validFrom": { "type": "string", "format": "date-time" },
+        "validTo": { "type": "string", "format": "date-time" }
+      }
+    },
+    "inventory": {
+      "type": "object",
+      "properties": {
+        "quantityAvailable": { "type": "integer", "minimum": 0 },
+        "quantityReserved": { "type": "integer", "minimum": 0 },
+        "reorderLevel": { "type": "integer", "minimum": 0 },
+        "warehouseCode": { "type": "string" }
+      }
+    },
+    "attributes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["key", "value"],
+        "properties": {
+          "key": { "type": "string", "minLength": 1 },
+          "value": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "media": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["url"],
+        "properties": {
+          "url": { "type": "string", "minLength": 1 },
+          "altText": { "type": "string" },
+          "displayOrder": { "type": "integer" },
+          "primaryImage": { "type": "boolean" }
+        }
+      }
+    },
+    "workflow": {
+      "type": "object",
+      "properties": {
+        "targetStatus": {
+          "type": "string",
+          "enum": [
+            "INITIAL",
+            "VALIDATING",
+            "BUSINESS_VALIDATED",
+            "PERSISTED",
+            "OUTBOX_CREATED",
+            "PUBLISHED",
+            "INDEXED",
+            "COMPLETED",
+            "FAILED",
+            "AMENDED",
+            "CANCELLED"
+          ]
+        },
+        "message": { "type": "string" }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "tags": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

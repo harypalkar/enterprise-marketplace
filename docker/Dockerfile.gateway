@@ -1,0 +1,32 @@
+FROM eclipse-temurin:21-jdk-alpine AS builder
+WORKDIR /build
+COPY pom.xml .
+COPY common-library common-library/
+COPY gateway-service gateway-service/
+COPY identity-service identity-service/
+COPY product-service product-service/
+COPY seller-service seller-service/
+COPY buyer-service buyer-service/
+COPY category-service category-service/
+COPY inventory-service inventory-service/
+COPY pricing-service pricing-service/
+COPY workflow-service workflow-service/
+COPY notification-service notification-service/
+COPY search-service search-service/
+COPY ai-service ai-service/
+COPY audit-service audit-service/
+COPY subscription-service subscription-service/
+COPY report-service report-service/
+COPY admin-service admin-service/
+RUN apk add --no-cache maven
+RUN mvn -pl gateway-service -am package -DskipTests -q
+
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /app
+RUN addgroup -S marketplace && adduser -S marketplace -G marketplace
+COPY --from=builder /build/gateway-service/target/*.jar app.jar
+USER marketplace
+EXPOSE 8080
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
+  CMD wget -qO- http://localhost:8080/actuator/health/liveness || exit 1
+ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]

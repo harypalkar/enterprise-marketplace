@@ -1,3 +1,19 @@
-﻿logging:
-  level:
-    com.enterprise.marketplace: INFO
+﻿spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI}
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI}
+
+marketplace:
+  security:
+    enabled: true
+
+management:
+  endpoint:
+    health:
+      show-details: when_authorized
+  tracing:
+    sampling:
+      probability: 0.5

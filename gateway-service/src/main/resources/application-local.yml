@@ -1,10 +1,10 @@
-﻿spring:
-  jpa:
-    show-sql: true
-
-springdoc:
+﻿springdoc:
   swagger-ui:
     enabled: true
+
+marketplace:
+  security:
+    enabled: ${MARKETPLACE_SECURITY_ENABLED:false}
 
 logging:
   level:

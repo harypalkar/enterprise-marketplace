@@ -1,0 +1,11 @@
+logging:
+  level:
+    com.enterprise.marketplace: WARN
+
+marketplace:
+  security:
+    enabled: false
+
+spring:
+  flyway:
+    enabled: false

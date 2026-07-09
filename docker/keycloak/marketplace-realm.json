@@ -1,0 +1,97 @@
+{
+  "realm": "marketplace",
+  "enabled": true,
+  "displayName": "Enterprise Marketplace",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "sslRequired": "external",
+  "roles": {
+    "realm": [
+      { "name": "ADMIN", "description": "Platform administrator" },
+      { "name": "SELLER", "description": "Marketplace seller" },
+      { "name": "BUYER", "description": "Marketplace buyer" }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "marketplace-gateway",
+      "name": "Marketplace API Gateway",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "marketplace-gateway-secret",
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "serviceAccountsEnabled": true,
+      "redirectUris": ["http://localhost:8080/*", "http://localhost:3000/*"],
+      "webOrigins": ["http://localhost:8080", "http://localhost:3000"],
+      "protocol": "openid-connect",
+      "fullScopeAllowed": true,
+      "defaultClientScopes": ["web-origins", "acr", "profile", "roles", "email"]
+    },
+    {
+      "clientId": "marketplace-services",
+      "name": "Marketplace Microservices",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "marketplace-services-secret",
+      "directAccessGrantsEnabled": false,
+      "standardFlowEnabled": false,
+      "serviceAccountsEnabled": true,
+      "protocol": "openid-connect",
+      "fullScopeAllowed": true
+    }
+  ],
+  "users": [
+    {
+      "username": "admin@marketplace.local",
+      "email": "admin@marketplace.local",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Platform",
+      "lastName": "Admin",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Admin@123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["ADMIN"]
+    },
+    {
+      "username": "seller@marketplace.local",
+      "email": "seller@marketplace.local",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Demo",
+      "lastName": "Seller",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Seller@123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["SELLER"]
+    },
+    {
+      "username": "buyer@marketplace.local",
+      "email": "buyer@marketplace.local",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Demo",
+      "lastName": "Buyer",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Buyer@123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["BUYER"]
+    }
+  ]
+}

@@ -1,8 +1,18 @@
 ﻿springdoc:
   swagger-ui:
     enabled: false
-  api-docs:
-    enabled: false
+
+marketplace:
+  ollama:
+    base-url: ${OLLAMA_BASE_URL}
+
+management:
+  endpoint:
+    health:
+      show-details: never
+  tracing:
+    sampling:
+      probability: 0.1
 
 logging:
   level:

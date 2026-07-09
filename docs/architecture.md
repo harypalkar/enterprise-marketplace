@@ -80,14 +80,29 @@ service/
 | `LoggingUtility` | Structured logging helpers |
 | `ValidationUtility` | Shared validation (GSTIN, PAN, mobile) |
 
-## Security Architecture (Future Milestone)
+## Security Architecture
 
-- **Keycloak** as Identity Provider
+- **Keycloak** as Identity Provider (`marketplace` realm)
 - **OAuth 2.0 / OIDC** with JWT bearer tokens
-- **Spring Security** resource server per microservice
-- Gateway-level token validation and claim propagation
+- **Spring Security** resource server on gateway and identity service
+- Gateway-level token validation and claim propagation (`X-User-Id`, `X-Roles`)
+- Realm roles: `ADMIN`, `SELLER`, `BUYER`
 
-## Observability Stack
+## Infrastructure Stack (Current Milestone)
+
+| Component | Integration Service | Health Endpoint |
+|-----------|--------------------|-----------------|
+| Keycloak | Gateway, Identity | JWT issuer validation |
+| Neon PostgreSQL | Identity | Hikari pool (no business tables yet) |
+| Redis | Identity | `/api/v1/infrastructure/health/redis` |
+| Kafka | Identity | `/api/v1/infrastructure/health/kafka` |
+| Elasticsearch | Search | `/api/v1/infrastructure/health/elasticsearch` |
+| Ollama | AI | `/api/v1/infrastructure/health/ollama` |
+| Prometheus / Grafana | All (Actuator) | `/actuator/prometheus` |
+| Jaeger | All (OTLP) | Trace export |
+| Mailhog | Notification (future) | SMTP capture |
+
+See [infrastructure.md](infrastructure.md) for Docker Compose, environment variables, and run instructions.
 
 | Tool | Purpose |
 |------|---------|
@@ -99,11 +114,13 @@ service/
 
 ## Deployment Topology
 
-- **Docker Compose** — local development (future milestone)
-- **Kubernetes** — production orchestration
-- **Helm** — package management
-- **Terraform** — cloud infrastructure as code
-- **Jenkins / GitLab CI** — CI/CD pipelines
+- **Docker Compose** — local development ([docker/docker-compose.yml](../docker/docker-compose.yml))
+- **Kubernetes** — production orchestration (future)
+- **Helm** — package management (future)
+- **Terraform** — cloud infrastructure as code (future)
+- **Jenkins / GitLab CI** — CI/CD pipelines (future)
+
+## Observability Stack
 
 ## Data Flow Example (Future)
 
@@ -119,10 +136,11 @@ Buyer Request → Gateway → Product Service → Inventory Service
 
 ## Milestone Roadmap
 
-1. **Bootstrap** (current) — Project structure, common library, service scaffolds
-2. Infrastructure — Docker Compose, Keycloak, Kafka, Redis, Elasticsearch
-3. Identity — Keycloak integration, user/role management
-4. Domain Services — Business APIs per bounded context
-5. Search & AI — Elasticsearch indexing, Ollama integration
-6. Observability — Full ELK, Prometheus, Grafana dashboards
+1. **Bootstrap** — Project structure, common library, service scaffolds
+2. **Infrastructure** — Docker Compose, Keycloak, Kafka, Redis, Elasticsearch, gateway security
+3. **Product Service** (current) — Product CRUD, Flyway, domain model
+4. Identity — User/role management APIs
+5. Domain Services — Business APIs per remaining bounded contexts
+5. Search & AI — Indexing and LLM features
+6. Observability — Full ELK, Grafana dashboards
 7. CI/CD — Jenkins/GitLab pipelines, Kubernetes deployment

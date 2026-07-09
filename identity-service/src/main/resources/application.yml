@@ -8,18 +8,58 @@
       write-dates-as-timestamps: false
     default-property-inclusion: non_null
   datasource:
-    url: ${NEON_DB_URL:jdbc:postgresql://localhost:5432/identity_service}
+    url: ${NEON_DB_URL:jdbc:postgresql://localhost:5432/identity_service?sslmode=${NEON_DB_SSL_MODE:prefer}}
     username: ${NEON_DB_USER:marketplace}
     password: ${NEON_DB_PASSWORD:marketplace}
     hikari:
-      maximum-pool-size: 10
-      minimum-idle: 2
+      maximum-pool-size: ${NEON_DB_POOL_MAX:10}
+      minimum-idle: ${NEON_DB_POOL_MIN:2}
       pool-name: identity-service-pool
-
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      data-source-properties:
+        ssl: ${NEON_DB_SSL:true}
+        sslmode: ${NEON_DB_SSL_MODE:prefer}
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: ${REDIS_TIMEOUT:3000ms}
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      acks: all
+      retries: 3
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        enable.idempotence: true
+    consumer:
+      group-id: ${KAFKA_CONSUMER_GROUP:identity-service}
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: com.enterprise.marketplace
+    admin:
+      fail-fast: false
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8180/realms/marketplace}
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://localhost:8180/realms/marketplace/protocol/openid-connect/certs}
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: validate
+      ddl-auto: none
     properties:
       hibernate:
         jdbc:
@@ -28,7 +68,7 @@
     enabled: false
 
 server:
-  port: 8081
+  port: ${IDENTITY_SERVICE_PORT:8081}
   shutdown: graceful
   error:
     include-message: never
@@ -45,9 +85,20 @@ management:
       probes:
         enabled: true
       show-details: when_authorized
+      group:
+        liveness:
+          include: livenessState,ping
+        readiness:
+          include: readinessState,ping
+  health:
+    redis:
+      enabled: true
   metrics:
     tags:
       application: ${spring.application.name}
+    export:
+      prometheus:
+        enabled: true
   tracing:
     sampling:
       probability: ${TRACING_SAMPLING_PROBABILITY:1.0}
@@ -72,3 +123,18 @@ logging:
 marketplace:
   service:
     name: identity-service
+  api:
+    version: v1
+  security:
+    enabled: ${MARKETPLACE_SECURITY_ENABLED:true}
+  kafka:
+    enabled: ${KAFKA_ENABLED:true}
+    topics:
+      events: ${KAFKA_TOPIC_EVENTS:marketplace.events}
+      audit: ${KAFKA_TOPIC_AUDIT:marketplace.audit}
+
+keycloak:
+  realm: ${KEYCLOAK_REALM:marketplace}
+  auth-server-url: ${KEYCLOAK_AUTH_SERVER_URL:http://localhost:8180}
+  client-id: ${KEYCLOAK_CLIENT_ID:marketplace-services}
+  client-secret: ${KEYCLOAK_CLIENT_SECRET:marketplace-services-secret}

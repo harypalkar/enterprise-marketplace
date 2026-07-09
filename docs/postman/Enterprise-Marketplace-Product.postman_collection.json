@@ -1,0 +1,159 @@
+{
+  "info": {
+    "name": "Enterprise Marketplace - Product Service",
+    "description": "Production product API with canonical envelope, JWT, and idempotency",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8082" },
+    { "key": "gatewayUrl", "value": "http://localhost:8080/api/products" },
+    { "key": "productId", "value": "" },
+    { "key": "idempotencyKey", "value": "{{$guid}}" },
+    { "key": "accessToken", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Actuator Health",
+          "request": { "method": "GET", "url": "{{baseUrl}}/actuator/health" }
+        },
+        {
+          "name": "Bootstrap Health",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/bootstrap/health" }
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "Create Product (Canonical)",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "if (pm.response.code === 201) {",
+                "  pm.collectionVariables.set('productId', pm.response.json().data.id);",
+                "}"
+              ]
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Idempotency-Key", "value": "{{idempotencyKey}}" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"header\": { \"sourceSystem\": \"postman\", \"channel\": \"API\", \"locale\": \"en-IN\" },\n  \"requestInfo\": { \"clientRequestId\": \"{{$guid}}\", \"idempotencyKey\": \"{{idempotencyKey}}\", \"requestedBy\": \"postman-user\" },\n  \"seller\": { \"sellerId\": \"00000000-0000-0000-0000-000000000001\" },\n  \"product\": { \"sku\": \"POSTMAN-SKU-001\", \"name\": \"Postman Test Product\", \"description\": \"Created via Postman\", \"unitOfMeasure\": \"PCS\", \"status\": \"DRAFT\" },\n  \"pricing\": { \"unitPrice\": 1500.00, \"currency\": \"INR\", \"minQuantity\": 1, \"validFrom\": \"2026-01-01T00:00:00Z\" },\n  \"inventory\": { \"quantityAvailable\": 100, \"quantityReserved\": 0, \"reorderLevel\": 10, \"warehouseCode\": \"WH-01\" },\n  \"attributes\": [{ \"key\": \"material\", \"value\": \"steel\" }],\n  \"media\": [{ \"url\": \"https://example.com/image.jpg\", \"altText\": \"Product image\", \"displayOrder\": 1, \"primaryImage\": true }]\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/products"
+          }
+        },
+        {
+          "name": "Get Product By ID",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/products/{{productId}}" }
+        },
+        {
+          "name": "List Products",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/products?page=0&size=20" }
+        },
+        {
+          "name": "Search Products",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/products/search?keyword=Postman&page=0&size=20" }
+        },
+        {
+          "name": "Update Product",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Idempotency-Key", "value": "{{$guid}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"header\": { \"sourceSystem\": \"postman\", \"channel\": \"API\", \"locale\": \"en-IN\" },\n  \"requestInfo\": { \"clientRequestId\": \"{{$guid}}\", \"idempotencyKey\": \"{{$guid}}\", \"requestedBy\": \"postman-user\" },\n  \"seller\": { \"sellerId\": \"00000000-0000-0000-0000-000000000001\" },\n  \"product\": { \"sku\": \"POSTMAN-SKU-001\", \"name\": \"Updated Product Name\", \"unitOfMeasure\": \"PCS\", \"status\": \"ACTIVE\" },\n  \"pricing\": { \"unitPrice\": 1600.00, \"currency\": \"INR\", \"minQuantity\": 1, \"validFrom\": \"2026-01-01T00:00:00Z\" },\n  \"inventory\": { \"quantityAvailable\": 120, \"quantityReserved\": 0, \"reorderLevel\": 15, \"warehouseCode\": \"WH-01\" }\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/products/{{productId}}"
+          }
+        },
+        {
+          "name": "Patch Product",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Idempotency-Key", "value": "{{$guid}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"product\": { \"name\": \"Patched Product Name\" }\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/products/{{productId}}"
+          }
+        },
+        {
+          "name": "Delete Product",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/api/v1/products/{{productId}}" }
+        }
+      ]
+    },
+    {
+      "name": "Negative Cases",
+      "item": [
+        {
+          "name": "Create Without Idempotency Key (400)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": "{{baseUrl}}/api/v1/products"
+          }
+        },
+        {
+          "name": "Create Invalid Schema (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Idempotency-Key", "value": "{{$guid}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{ \"product\": { \"sku\": \"\" } }" },
+            "url": "{{baseUrl}}/api/v1/products"
+          }
+        },
+        {
+          "name": "Get Non-Existent Product (404)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/products/00000000-0000-0000-0000-000000000099"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Gateway",
+      "item": [
+        {
+          "name": "Create via Gateway",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Idempotency-Key", "value": "{{$guid}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"header\": { \"sourceSystem\": \"postman\", \"channel\": \"API\", \"locale\": \"en-IN\" },\n  \"requestInfo\": { \"clientRequestId\": \"{{$guid}}\", \"idempotencyKey\": \"{{$guid}}\", \"requestedBy\": \"postman-user\" },\n  \"seller\": { \"sellerId\": \"00000000-0000-0000-0000-000000000001\" },\n  \"product\": { \"sku\": \"GW-SKU-001\", \"name\": \"Gateway Product\", \"unitOfMeasure\": \"PCS\" },\n  \"pricing\": { \"unitPrice\": 999.00, \"currency\": \"INR\", \"minQuantity\": 1, \"validFrom\": \"2026-01-01T00:00:00Z\" },\n  \"inventory\": { \"quantityAvailable\": 50, \"quantityReserved\": 0, \"reorderLevel\": 5, \"warehouseCode\": \"WH-01\" }\n}"
+            },
+            "url": "{{gatewayUrl}}/api/v1/products"
+          }
+        }
+      ]
+    }
+  ]
+}

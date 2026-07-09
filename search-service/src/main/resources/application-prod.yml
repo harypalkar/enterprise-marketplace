@@ -1,8 +1,25 @@
 ﻿springdoc:
   swagger-ui:
     enabled: false
-  api-docs:
-    enabled: false
+
+spring:
+  elasticsearch:
+    uris: ${ELASTICSEARCH_URIS}
+
+marketplace:
+  elasticsearch:
+    enabled: true
+
+management:
+  endpoint:
+    health:
+      show-details: never
+      group:
+        readiness:
+          include: readinessState,ping,elasticsearch
+  tracing:
+    sampling:
+      probability: 0.1
 
 logging:
   level:

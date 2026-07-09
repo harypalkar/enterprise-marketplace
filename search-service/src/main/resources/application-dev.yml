@@ -1,3 +1,21 @@
-﻿logging:
+﻿spring:
+  elasticsearch:
+    uris: ${ELASTICSEARCH_URIS}
+
+marketplace:
+  elasticsearch:
+    enabled: true
+
+logging:
   level:
     com.enterprise.marketplace: DEBUG
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  endpoint:
+    health:
+      group:
+        readiness:
+          include: readinessState,ping,elasticsearch

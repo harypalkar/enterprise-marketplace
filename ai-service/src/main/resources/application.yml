@@ -7,13 +7,11 @@
     serialization:
       write-dates-as-timestamps: false
     default-property-inclusion: non_null
-
-
   flyway:
     enabled: false
 
 server:
-  port: 8091
+  port: ${AI_SERVICE_PORT:8091}
   shutdown: graceful
   error:
     include-message: never
@@ -33,6 +31,9 @@ management:
   metrics:
     tags:
       application: ${spring.application.name}
+    export:
+      prometheus:
+        enabled: true
   tracing:
     sampling:
       probability: ${TRACING_SAMPLING_PROBABILITY:1.0}
@@ -57,3 +58,9 @@ logging:
 marketplace:
   service:
     name: ai-service
+  api:
+    version: v1
+  ollama:
+    base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+    default-model: ${OLLAMA_DEFAULT_MODEL:llama3.2}
+    timeout: ${OLLAMA_TIMEOUT:60s}

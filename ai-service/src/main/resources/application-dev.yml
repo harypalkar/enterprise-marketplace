@@ -1,3 +1,12 @@
-﻿logging:
+﻿marketplace:
+  ollama:
+    base-url: ${OLLAMA_BASE_URL}
+
+logging:
   level:
     com.enterprise.marketplace: DEBUG
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0

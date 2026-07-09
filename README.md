@@ -4,7 +4,9 @@ Production-ready B2B marketplace backend platform (IndiaMART-like) built with Ja
 
 ## Overview
 
-This repository contains the **Enterprise Project Bootstrap** — a Maven multi-module monorepo with shared libraries, API gateway, and domain microservice scaffolds. Business APIs, database migrations, and Docker Compose infrastructure will be added in subsequent milestones.
+This repository contains the **Enterprise Marketplace Platform** — a Maven multi-module monorepo with shared libraries, API gateway, domain microservice scaffolds, and a complete **Infrastructure Foundation** (Docker Compose, Keycloak, Kafka, Redis, Elasticsearch, observability stack).
+
+Business APIs for the core B2B domain (product, seller, buyer, category, inventory, pricing) are implemented with full CRUD. Remaining scaffolds (workflow, notification, audit, etc.) will be added in subsequent milestones.
 
 ## Technology Stack
 
@@ -12,7 +14,7 @@ This repository contains the **Enterprise Project Bootstrap** — a Maven multi-
 |-------|------------|
 | Runtime | Java 21 |
 | Framework | Spring Boot 3.5.x, Spring Cloud 2025.0.x |
-| Security | Spring Security, Keycloak (future milestone) |
+| Security | Spring Security, Keycloak (OIDC/JWT) |
 | Gateway | Spring Cloud Gateway |
 | Database | Neon PostgreSQL (per service) |
 | Cache | Redis |
@@ -30,55 +32,65 @@ This repository contains the **Enterprise Project Bootstrap** — a Maven multi-
 | Module | Port | Description |
 |--------|------|-------------|
 | `common-library` | — | Shared cross-cutting concerns |
-| `gateway-service` | 8080 | API Gateway |
-| `identity-service` | 8081 | Identity & authentication |
-| `product-service` | 8082 | Product catalog |
-| `seller-service` | 8083 | Seller management |
-| `buyer-service` | 8084 | Buyer management |
-| `category-service` | 8085 | Category taxonomy |
-| `inventory-service` | 8086 | Inventory management |
-| `pricing-service` | 8087 | Pricing engine |
-| `workflow-service` | 8088 | Business workflows |
-| `notification-service` | 8089 | Notifications |
-| `search-service` | 8090 | Search indexing |
-| `ai-service` | 8091 | AI capabilities |
-| `audit-service` | 8092 | Audit trail |
-| `subscription-service` | 8093 | Subscriptions |
-| `report-service` | 8094 | Reporting |
-| `admin-service` | 8095 | Administration |
+| `gateway-service` | 8080 | API Gateway (JWT, routing, tracing) |
+| `identity-service` | 8081 | Identity, Redis, Kafka, Neon DB |
+| `product-service` | 8082 | Product catalog (CRUD) |
+| `seller-service` | 8083 | Seller management (CRUD) |
+| `buyer-service` | 8084 | Buyer management (CRUD) |
+| `category-service` | 8085 | Category taxonomy (CRUD) |
+| `inventory-service` | 8086 | Inventory management (CRUD + reserve/release) |
+| `pricing-service` | 8087 | Pricing engine (CRUD) |
+| `workflow-service` | 8088 | Business workflows (scaffold) |
+| `notification-service` | 8089 | Notifications (scaffold) |
+| `search-service` | 8090 | Elasticsearch integration |
+| `ai-service` | 8091 | Ollama integration |
+| `audit-service` | 8092 | Audit trail (scaffold) |
+| `subscription-service` | 8093 | Subscriptions (scaffold) |
+| `report-service` | 8094 | Reporting (scaffold) |
+| `admin-service` | 8095 | Administration (scaffold) |
 
 ## Prerequisites
 
 - JDK 21
 - Maven 3.9+
+- Docker Desktop (for local infrastructure)
 - Git
 
 ## Quick Start
 
+### 1. Start Infrastructure
+
 ```bash
-# Build entire platform
+cd docker
+cp .env.example .env
+docker compose --env-file .env up -d
+```
+
+### 2. Build Platform
+
+```bash
 mvn clean install
-
-# Run a specific service (example: product-service)
-mvn spring-boot:run -pl product-service -am
-
-# Format code
-mvn spotless:apply
-
-# Run with coverage profile
-mvn verify -Pcoverage
 ```
 
-## Bootstrap Health Check (Postman)
+### 3. Run a Service
 
-Each servlet-based microservice exposes a bootstrap health endpoint:
+```powershell
+cd gateway-service
+mvn spring-boot:run
+```
+
+Repeat for `identity-service`, `search-service`, and `ai-service` as needed.
+
+### 4. Verify Health
 
 ```
-GET http://localhost:{port}/api/v1/bootstrap/health
-Headers:
-  X-Correlation-Id: {optional-uuid}
-  X-Request-Id: {optional-uuid}
+GET http://localhost:8080/actuator/health
+GET http://localhost:8081/api/v1/infrastructure/health
+GET http://localhost:8090/api/v1/infrastructure/health/elasticsearch
+GET http://localhost:8091/api/v1/infrastructure/health/ollama
 ```
+
+Import the Postman collection from `docs/postman/Enterprise-Marketplace-Infrastructure.postman_collection.json`.
 
 ## Project Structure
 
@@ -87,10 +99,13 @@ See [docs/folder-structure.md](docs/folder-structure.md) for the complete layout
 ## Documentation
 
 - [Architecture](docs/architecture.md)
+- [Product Service](docs/product-service.md)
+- [Domain Services](docs/domain-services.md)
 - [Coding Standards](docs/coding-standards.md)
 - [Folder Structure](docs/folder-structure.md)
 - [Logging Standard](docs/logging-standard.md)
 - [Branching Strategy](docs/branching-strategy.md)
+- [Docker README](docker/README.md)
 
 ## Configuration Profiles
 
@@ -100,8 +115,6 @@ See [docs/folder-structure.md](docs/folder-structure.md) for the complete layout
 | `dev` | Development environment |
 | `qa` | QA environment |
 | `prod` | Production environment |
-
-YAML templates are available under `config/templates/`.
 
 ## License
 

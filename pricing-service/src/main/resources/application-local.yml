@@ -1,4 +1,8 @@
 ﻿spring:
+  datasource:
+    url: ${NEON_DB_URL:jdbc:postgresql://localhost:5432/pricing_service?sslmode=prefer}
+    username: ${NEON_DB_USER:marketplace}
+    password: ${NEON_DB_PASSWORD:marketplace}
   jpa:
     show-sql: true
 
@@ -9,6 +13,10 @@ springdoc:
 logging:
   level:
     com.enterprise.marketplace: DEBUG
+
+marketplace:
+  security:
+    enabled: ${MARKETPLACE_SECURITY_ENABLED:false}
 
 management:
   endpoint:
