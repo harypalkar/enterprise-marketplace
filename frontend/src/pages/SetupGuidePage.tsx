@@ -9,24 +9,19 @@ export function SetupGuidePage() {
       </header>
 
       <section className="panel">
-        <h2>Terminal 1 — Infrastructure + Gateway</h2>
-        <pre>{`cd docker
-docker compose up -d
-
-cd ..\\gateway-service
-$env:JAVA_HOME = "C:\\Program Files\\Java\\jdk-21.0.11"
-$env:MARKETPLACE_SECURITY_ENABLED = "false"
-mvn spring-boot:run`}</pre>
-        <p><strong>Check:</strong> <a href="http://localhost:8080/actuator/health" target="_blank" rel="noreferrer">http://localhost:8080/actuator/health</a></p>
+        <h2>Terminal 1 — Gateway (port 9080)</h2>
+        <pre>{`cd scripts
+.\\start-gateway.ps1`}</pre>
+        <p><strong>Check:</strong> <a href="http://localhost:9080/actuator/health" target="_blank" rel="noreferrer">http://localhost:9080/actuator/health</a></p>
+        <p className="warn-text">Port 8080 on your PC is used by another app. Marketplace gateway must use port 9080.</p>
       </section>
 
       <section className="panel">
         <h2>Terminal 2 — Core microservices (batch script)</h2>
         <pre>{`cd scripts
-.\\start-minimal-services.ps1`}</pre>
-        <p>Starts: Product, Seller, Buyer, Category, Search, AI, Notification, Workflow, Audit (standalone profile).</p>
-        <p>Or run manually one service:</p>
-        <pre>{`.\\start-service.ps1 product-service`}</pre>
+.\\start-essential-services.ps1`}</pre>
+        <p>Starts 9 core services. Wait 60–90 seconds for Maven startup.</p>
+        <p>Verify: <code>.\\check-setup.ps1</code></p>
       </section>
 
       <section className="panel">

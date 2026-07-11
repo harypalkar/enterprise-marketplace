@@ -1,36 +1,29 @@
 # Minimal 3-terminal setup for frontend testing
 
-## Terminal 1 — Docker + Gateway
-
-```powershell
-cd docker
-docker compose up -d
-
-cd ..\gateway-service
-$env:JAVA_HOME = "C:\Program Files\Java\jdk-21.0.11"
-$env:MARKETPLACE_SECURITY_ENABLED = "false"
-mvn spring-boot:run
-```
-
-**Verify:** http://localhost:8080/actuator/health
-
----
-
-## Terminal 2 — Microservices (one command)
+## Terminal 1 — Gateway (port 9080)
 
 ```powershell
 cd scripts
-.\start-minimal-services.ps1
+.\start-gateway.ps1
 ```
 
-This opens 14 service windows automatically. Wait ~60 seconds.
+**Verify:** http://localhost:9080/actuator/health
 
-**Or start only what you need:**
+> Port 8080 on your PC may be used by another app. Marketplace gateway uses **9080**.
+
+---
+
+## Terminal 2 — Essential microservices
 
 ```powershell
-.\start-service.ps1 product-service
-.\start-service.ps1 seller-service
-.\start-service.ps1 search-service
+cd scripts
+.\start-essential-services.ps1
+```
+
+Wait 60–90 seconds, then verify:
+
+```powershell
+.\check-setup.ps1
 ```
 
 ---

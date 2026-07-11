@@ -45,7 +45,7 @@ export function DashboardPage() {
       <header className="page-header">
         <div>
           <h1>Service Dashboard</h1>
-          <p>Health checks through the API Gateway proxy at port 8080.</p>
+          <p>Health checks through the API Gateway at http://localhost:9080 (port 8080 may be used by another app).</p>
         </div>
         <button type="button" onClick={() => void refresh()} disabled={loading}>
           {loading ? 'Checking…' : 'Refresh'}
@@ -61,7 +61,7 @@ export function DashboardPage() {
         </article>
         <article className="stat-card">
           <span>Gateway</span>
-          <strong>http://localhost:8080</strong>
+          <strong>http://localhost:9080</strong>
         </article>
         <article className="stat-card">
           <span>UI Dev Server</span>

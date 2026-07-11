@@ -46,6 +46,13 @@ export async function apiRequest<T>(url: string, options: RequestOptions = {}): 
   try {
     payload = text ? JSON.parse(text) : null;
   } catch {
+    if (text.includes('<html') || text.includes('<!DOCTYPE')) {
+      throw new ApiError(
+        response.status,
+        `Gateway returned HTML instead of JSON. Wrong app may be on the port, or the service is not running. URL: ${url}`,
+        text.slice(0, 200),
+      );
+    }
     payload = text;
   }
 
