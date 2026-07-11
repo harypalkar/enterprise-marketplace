@@ -81,6 +81,16 @@ mvn spring-boot:run
 
 Repeat for `identity-service`, `search-service`, and `ai-service` as needed.
 
+### 5. Run the Test Frontend
+
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+Open **http://localhost:5173** for the end-to-end test console. See [End-to-End Testing Guide](docs/end-to-end-testing-guide.md).
+
 ### 4. Verify Health
 
 ```
