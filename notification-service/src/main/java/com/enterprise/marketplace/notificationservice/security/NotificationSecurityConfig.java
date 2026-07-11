@@ -43,9 +43,15 @@ public class NotificationSecurityConfig {
                             .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/inbox/**")
                             .permitAll()
                             .requestMatchers("/api/v1/notifications/**")
-                            .hasAnyRole(MarketplaceRoles.SELLER, MarketplaceRoles.ADMIN)
+                            .hasAnyRole(
+                                    MarketplaceRoles.SELLER,
+                                    MarketplaceRoles.BUYER,
+                                    MarketplaceRoles.ADMIN)
                             .requestMatchers("/api/v1/inbox/**")
-                            .hasAnyRole(MarketplaceRoles.SELLER, MarketplaceRoles.ADMIN)
+                            .hasAnyRole(
+                                    MarketplaceRoles.SELLER,
+                                    MarketplaceRoles.BUYER,
+                                    MarketplaceRoles.ADMIN)
                             .anyRequest()
                             .authenticated())
                     .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));

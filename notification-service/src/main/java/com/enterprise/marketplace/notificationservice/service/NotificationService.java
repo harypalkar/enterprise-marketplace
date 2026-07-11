@@ -4,6 +4,9 @@ import com.enterprise.marketplace.notificationservice.dto.CreateNotificationRequ
 import com.enterprise.marketplace.notificationservice.dto.InboxPageResponse;
 import com.enterprise.marketplace.notificationservice.dto.NotificationPageResponse;
 import com.enterprise.marketplace.notificationservice.dto.NotificationResponse;
+import com.enterprise.marketplace.notificationservice.dto.RetryNotificationRequest;
+import com.enterprise.marketplace.notificationservice.dto.RetryNotificationResponse;
+import com.enterprise.marketplace.notificationservice.dto.SendNotificationRequest;
 import com.enterprise.marketplace.notificationservice.dto.StatusUpdateRequest;
 import com.enterprise.marketplace.notificationservice.dto.UpdateNotificationRequest;
 import com.enterprise.marketplace.notificationservice.enums.NotificationStatus;
@@ -12,6 +15,10 @@ import java.util.UUID;
 public interface NotificationService {
 
     NotificationResponse createNotification(CreateNotificationRequest request);
+
+    NotificationResponse sendNotification(SendNotificationRequest request);
+
+    NotificationPageResponse listNotifications(int page, int size);
 
     NotificationResponse getNotification(UUID notificationId);
 
@@ -31,7 +38,11 @@ public interface NotificationService {
 
     NotificationResponse retryNotification(UUID notificationId);
 
+    RetryNotificationResponse retryNotifications(RetryNotificationRequest request);
+
     void processFromKafkaEvent(String payload, String eventSource);
 
     void dispatchPendingNotifications();
+
+    void expireStaleNotifications();
 }

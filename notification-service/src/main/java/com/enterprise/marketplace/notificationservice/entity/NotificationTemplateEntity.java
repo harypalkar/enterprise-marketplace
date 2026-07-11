@@ -1,6 +1,7 @@
 package com.enterprise.marketplace.notificationservice.entity;
 
 import com.enterprise.marketplace.notificationservice.enums.NotificationChannel;
+import com.enterprise.marketplace.notificationservice.enums.TemplateContentType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -39,6 +40,10 @@ public class NotificationTemplateEntity {
 
     @Column(name = "body_template", nullable = false, columnDefinition = "text")
     private String bodyTemplate;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "content_type", nullable = false, length = 32)
+    private TemplateContentType contentType = TemplateContentType.PLAIN_TEXT;
 
     @Column(name = "active", nullable = false)
     private Boolean active = Boolean.TRUE;

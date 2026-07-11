@@ -6,6 +6,9 @@ import com.enterprise.marketplace.common.idempotency.Idempotent;
 import com.enterprise.marketplace.notificationservice.dto.CreateNotificationRequest;
 import com.enterprise.marketplace.notificationservice.dto.NotificationPageResponse;
 import com.enterprise.marketplace.notificationservice.dto.NotificationResponse;
+import com.enterprise.marketplace.notificationservice.dto.RetryNotificationRequest;
+import com.enterprise.marketplace.notificationservice.dto.RetryNotificationResponse;
+import com.enterprise.marketplace.notificationservice.dto.SendNotificationRequest;
 import com.enterprise.marketplace.notificationservice.dto.StatusUpdateRequest;
 import com.enterprise.marketplace.notificationservice.dto.UpdateNotificationRequest;
 import com.enterprise.marketplace.notificationservice.enums.NotificationStatus;
@@ -48,6 +51,34 @@ public class NotificationController {
         NotificationResponse response = notificationService.createNotification(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success(response, "Notification created successfully"));
+    }
+
+    @PostMapping("/send")
+    @Idempotent
+    @Operation(
+            summary = "Create and send notification immediately",
+            security = @SecurityRequirement(name = HttpHeaders.IDEMPOTENCY_KEY))
+    public ResponseEntity<ApiResponse<NotificationResponse>> sendNotification(
+            @Valid @RequestBody SendNotificationRequest request) {
+        NotificationResponse response = notificationService.sendNotification(request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success(response, "Notification sent successfully"));
+    }
+
+    @PostMapping("/retry")
+    @Idempotent
+    @Operation(summary = "Retry one or more failed notifications")
+    public ResponseEntity<ApiResponse<RetryNotificationResponse>> retryNotifications(
+            @Valid @RequestBody RetryNotificationRequest request) {
+        return ResponseEntity.ok(ApiResponse.success(
+                notificationService.retryNotifications(request), "Notification retry processed"));
+    }
+
+    @GetMapping
+    @Operation(summary = "List notifications")
+    public ResponseEntity<ApiResponse<NotificationPageResponse>> listNotifications(
+            @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(ApiResponse.success(notificationService.listNotifications(page, size)));
     }
 
     @GetMapping("/{notificationId}")

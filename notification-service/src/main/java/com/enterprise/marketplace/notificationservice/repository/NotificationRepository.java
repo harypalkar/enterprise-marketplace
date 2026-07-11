@@ -20,6 +20,11 @@ public interface NotificationRepository extends JpaRepository<NotificationEntity
 
     Page<NotificationEntity> findByStatusAndActiveTrue(NotificationStatus status, Pageable pageable);
 
+    Page<NotificationEntity> findByActiveTrue(Pageable pageable);
+
     List<NotificationEntity> findTop50ByStatusInAndActiveTrueOrderByCreatedAtAsc(
             Collection<NotificationStatus> statuses);
+
+    List<NotificationEntity> findTop50ByStatusInAndExpiresAtBeforeAndActiveTrueOrderByCreatedAtAsc(
+            Collection<NotificationStatus> statuses, java.time.Instant expiresBefore);
 }

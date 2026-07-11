@@ -1,0 +1,66 @@
+{
+  "info": {
+    "name": "Enterprise Marketplace - Search Service",
+    "description": "Elasticsearch product search with Kafka indexing flow",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8090" },
+    { "key": "gatewayUrl", "value": "http://localhost:8080/api/search" },
+    { "key": "productId", "value": "" },
+    { "key": "accessToken", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        { "name": "Bootstrap Health", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/bootstrap/health" } },
+        { "name": "Elasticsearch Health", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/infrastructure/health/elasticsearch" } }
+      ]
+    },
+    {
+      "name": "Search",
+      "item": [
+        {
+          "name": "Search Products",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/search/products?q=steel&page=0&size=20&sort=indexedAt,desc"
+          }
+        },
+        {
+          "name": "Search Products via Gateway",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{gatewayUrl}}/api/v1/search/products?q=product&status=ACTIVE"
+          }
+        },
+        {
+          "name": "Get Indexed Product",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/search/products/{{productId}}"
+          }
+        },
+        {
+          "name": "Reindex Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"sku\": \"SKU-001\",\n  \"name\": \"Industrial Steel Rod\",\n  \"description\": \"High quality steel rod\",\n  \"sellerId\": \"00000000-0000-0000-0000-000000000001\",\n  \"status\": \"ACTIVE\",\n  \"unitPrice\": 1500.00,\n  \"currency\": \"INR\",\n  \"unitOfMeasure\": \"KG\",\n  \"action\": \"REINDEX\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/search/products/{{productId}}/reindex"
+          }
+        }
+      ]
+    }
+  ]
+}

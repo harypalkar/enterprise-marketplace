@@ -1,4 +1,4 @@
-package com.enterprise.marketplace.searchservice.bootstrap;
+package com.enterprise.marketplace.searchservice.controller;
 
 import com.enterprise.marketplace.common.api.ApiResponse;
 import com.enterprise.marketplace.common.context.RequestContext;

@@ -42,11 +42,16 @@ class NotificationKafkaEventConsumerTest {
     }
 
     @Test
-    void shouldInvokeServiceForWorkflowCompletedEvent() {
-        doNothing().when(notificationService).processFromKafkaEvent(eq("{}"), eq("workflow-completed"));
+    void shouldInvokeServiceForProductCreatedEvent() {
+        doNothing().when(notificationService).processFromKafkaEvent(eq("{}"), eq("product-created"));
+        consumer.onProductCreated("{}");
+        verify(notificationService).processFromKafkaEvent(eq("{}"), eq("product-created"));
+    }
 
-        consumer.onWorkflowCompleted("{}");
-
-        verify(notificationService).processFromKafkaEvent(eq("{}"), eq("workflow-completed"));
+    @Test
+    void shouldInvokeServiceForSubscriptionExpiredEvent() {
+        doNothing().when(notificationService).processFromKafkaEvent(eq("{}"), eq("subscription-expired"));
+        consumer.onSubscriptionExpired("{}");
+        verify(notificationService).processFromKafkaEvent(eq("{}"), eq("subscription-expired"));
     }
 }

@@ -1,12 +1,13 @@
 package com.enterprise.marketplace.notificationservice.enums;
 
 public enum NotificationStatus {
-    PENDING,
+    CREATED,
     QUEUED,
     PROCESSING,
     SENT,
     DELIVERED,
     FAILED,
-    RETRY,
-    CANCELLED
+    RETRYING,
+    CANCELLED,
+    EXPIRED
 }

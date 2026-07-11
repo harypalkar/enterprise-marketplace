@@ -4,6 +4,10 @@ import com.enterprise.marketplace.common.exception.ErrorCode;
 import com.enterprise.marketplace.common.exception.MarketplaceException;
 import com.enterprise.marketplace.notificationservice.entity.NotificationEntity;
 import com.enterprise.marketplace.notificationservice.enums.NotificationChannel;
+import com.enterprise.marketplace.notificationservice.provider.NotificationProvider;
+import com.enterprise.marketplace.notificationservice.provider.ProviderDeliveryResult;
+import com.enterprise.marketplace.notificationservice.provider.email.SesEmailProvider;
+import com.enterprise.marketplace.notificationservice.provider.email.SmtpEmailProvider;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -12,22 +16,28 @@ import org.springframework.stereotype.Component;
 @Component
 public class NotificationChannelDispatcher {
 
-    private final Map<NotificationChannel, NotificationChannelHandler> handlers;
+    private final Map<NotificationChannel, NotificationProvider> providers;
 
-    public NotificationChannelDispatcher(List<NotificationChannelHandler> handlerList) {
-        this.handlers = new EnumMap<>(NotificationChannel.class);
-        for (NotificationChannelHandler handler : handlerList) {
-            handlers.put(handler.getChannel(), handler);
+    public NotificationChannelDispatcher(List<NotificationProvider> providerList) {
+        this.providers = new EnumMap<>(NotificationChannel.class);
+        for (NotificationProvider provider : providerList) {
+            if (provider instanceof SmtpEmailProvider || provider instanceof SesEmailProvider) {
+                continue;
+            }
+            providers.put(provider.getChannel(), provider);
         }
     }
 
     public ChannelDeliveryResult dispatch(NotificationEntity notification) {
-        NotificationChannelHandler handler = handlers.get(notification.getChannel());
-        if (handler == null) {
+        NotificationProvider provider = providers.get(notification.getChannel());
+        if (provider == null) {
             throw new MarketplaceException(
                     ErrorCode.BUSINESS_RULE_VIOLATION,
-                    "No handler registered for channel " + notification.getChannel());
+                    "No provider registered for channel " + notification.getChannel());
         }
-        return handler.deliver(notification);
+        ProviderDeliveryResult result = provider.deliver(notification);
+        return result.success()
+                ? ChannelDeliveryResult.success(result.response())
+                : ChannelDeliveryResult.failure(result.errorMessage());
     }
 }

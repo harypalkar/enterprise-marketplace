@@ -18,36 +18,43 @@ import org.springframework.util.StringUtils;
 public class NotificationRequestValidator {
 
     private static final Map<NotificationStatus, Set<NotificationStatus>> ALLOWED_TRANSITIONS = Map.of(
-            NotificationStatus.PENDING,
+            NotificationStatus.CREATED,
                     EnumSet.of(
                             NotificationStatus.QUEUED,
                             NotificationStatus.PROCESSING,
-                            NotificationStatus.CANCELLED),
+                            NotificationStatus.CANCELLED,
+                            NotificationStatus.EXPIRED),
             NotificationStatus.QUEUED,
-                    EnumSet.of(NotificationStatus.PROCESSING, NotificationStatus.CANCELLED),
+                    EnumSet.of(
+                            NotificationStatus.PROCESSING,
+                            NotificationStatus.CANCELLED,
+                            NotificationStatus.EXPIRED),
             NotificationStatus.PROCESSING,
                     EnumSet.of(
                             NotificationStatus.SENT,
                             NotificationStatus.DELIVERED,
                             NotificationStatus.FAILED,
-                            NotificationStatus.RETRY),
-            NotificationStatus.RETRY,
+                            NotificationStatus.RETRYING),
+            NotificationStatus.RETRYING,
                     EnumSet.of(
                             NotificationStatus.QUEUED,
                             NotificationStatus.PROCESSING,
-                            NotificationStatus.CANCELLED),
+                            NotificationStatus.CANCELLED,
+                            NotificationStatus.EXPIRED),
             NotificationStatus.SENT,
                     EnumSet.of(NotificationStatus.DELIVERED, NotificationStatus.FAILED),
             NotificationStatus.FAILED,
-                    EnumSet.of(NotificationStatus.RETRY, NotificationStatus.CANCELLED),
+                    EnumSet.of(NotificationStatus.RETRYING, NotificationStatus.CANCELLED),
             NotificationStatus.DELIVERED, EnumSet.noneOf(NotificationStatus.class),
-            NotificationStatus.CANCELLED, EnumSet.noneOf(NotificationStatus.class));
+            NotificationStatus.CANCELLED, EnumSet.noneOf(NotificationStatus.class),
+            NotificationStatus.EXPIRED, EnumSet.noneOf(NotificationStatus.class));
 
     private final NotificationRepository notificationRepository;
 
     public void validateCreateRequest(CreateNotificationRequest request) {
         validateRequestIdUnique(request.getRequestId());
-        validateChannelRequirements(request.getChannel(), request.getRecipientAddress(), request.getBody(), request.getTemplateCode());
+        validateChannelRequirements(
+                request.getChannel(), request.getRecipientAddress(), request.getBody(), request.getTemplateCode());
     }
 
     public void validateTransition(NotificationStatus fromStatus, NotificationStatus toStatus) {
@@ -72,10 +79,10 @@ public class NotificationRequestValidator {
     }
 
     public void validateRetryAllowed(NotificationStatus status, int retryCount, int maxRetries) {
-        if (status != NotificationStatus.FAILED && status != NotificationStatus.RETRY) {
+        if (status != NotificationStatus.FAILED && status != NotificationStatus.RETRYING) {
             throw new MarketplaceException(
                     ErrorCode.BUSINESS_RULE_VIOLATION,
-                    "Retry is only allowed for FAILED or RETRY notifications");
+                    "Retry is only allowed for FAILED or RETRYING notifications");
         }
         if (retryCount >= maxRetries) {
             throw new MarketplaceException(

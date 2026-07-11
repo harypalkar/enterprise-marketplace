@@ -83,4 +83,7 @@ public class NotificationEntity extends BaseEntity {
 
     @Column(name = "delivered_at")
     private Instant deliveredAt;
+
+    @Column(name = "expires_at")
+    private Instant expiresAt;
 }

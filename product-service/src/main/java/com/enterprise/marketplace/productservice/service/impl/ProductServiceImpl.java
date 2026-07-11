@@ -136,6 +136,11 @@ public class ProductServiceImpl implements ProductService {
                 "product-created",
                 ProductKafkaTopics.PRODUCT_CREATED,
                 buildEventPayload(savedProduct, "CREATED"));
+        saveOutboxEvent(
+                savedProduct.getId(),
+                "search-index",
+                ProductKafkaTopics.SEARCH_INDEX,
+                buildSearchIndexPayload(savedProduct, "INDEX"));
         transitionWorkflow(workflow, ProductWorkflowStatus.OUTBOX_CREATED, "Outbox event created");
         transitionWorkflow(
                 workflow,
@@ -202,6 +207,7 @@ public class ProductServiceImpl implements ProductService {
 
         saveAudit(id, AuditOperation.UPDATE, beforeState, savedProduct, request.getRequestInfo());
         saveOutboxEvent(id, "product-updated", ProductKafkaTopics.PRODUCT_UPDATED, buildEventPayload(savedProduct, "UPDATED"));
+        saveOutboxEvent(id, "search-index", ProductKafkaTopics.SEARCH_INDEX, buildSearchIndexPayload(savedProduct, "UPDATE"));
 
         return productMapper.toDetailResponse(
                 savedProduct,
@@ -261,6 +267,7 @@ public class ProductServiceImpl implements ProductService {
         ProductWorkflowEntity workflow = updateWorkflow(id, request.getWorkflow());
         saveAudit(id, AuditOperation.PATCH, beforeState, savedProduct, request.getRequestInfo());
         saveOutboxEvent(id, "product-updated", ProductKafkaTopics.PRODUCT_UPDATED, buildEventPayload(savedProduct, "PATCHED"));
+        saveOutboxEvent(id, "search-index", ProductKafkaTopics.SEARCH_INDEX, buildSearchIndexPayload(savedProduct, "UPDATE"));
 
         return productMapper.toDetailResponse(
                 savedProduct,
@@ -295,6 +302,7 @@ public class ProductServiceImpl implements ProductService {
 
         saveAudit(id, AuditOperation.DELETE, beforeState, savedProduct, null);
         saveOutboxEvent(id, "product-deleted", ProductKafkaTopics.PRODUCT_DELETED, buildEventPayload(savedProduct, "DELETED"));
+        saveOutboxEvent(id, "search-index", ProductKafkaTopics.SEARCH_INDEX, buildSearchIndexPayload(savedProduct, "DELETE"));
     }
 
     private ProductDetailResponse buildDetailResponse(ProductEntity product) {
@@ -470,6 +478,25 @@ public class ProductServiceImpl implements ProductService {
         payload.put("productId", product.getId());
         payload.put("sku", product.getSku());
         payload.put("sellerId", product.getSellerId());
+        payload.put("status", product.getStatus());
+        payload.put("action", action);
+        payload.put("correlationId", RequestContext.getCorrelationId());
+        payload.put("requestId", RequestContext.getRequestId());
+        payload.put("occurredAt", Instant.now());
+        return payload;
+    }
+
+    private Map<String, Object> buildSearchIndexPayload(ProductEntity product, String action) {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("productId", product.getId());
+        payload.put("sku", product.getSku());
+        payload.put("name", product.getName());
+        payload.put("description", product.getDescription());
+        payload.put("sellerId", product.getSellerId());
+        payload.put("categoryId", product.getCategoryId());
+        payload.put("unitPrice", product.getUnitPrice());
+        payload.put("currency", product.getCurrency());
+        payload.put("unitOfMeasure", product.getUnitOfMeasure());
         payload.put("status", product.getStatus());
         payload.put("action", action);
         payload.put("correlationId", RequestContext.getCorrelationId());

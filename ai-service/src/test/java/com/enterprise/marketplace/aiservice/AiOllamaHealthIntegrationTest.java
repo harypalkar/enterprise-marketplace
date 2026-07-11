@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,11 +21,41 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
     "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,"
-            + "org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration"
+            + "org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration,"
+            + "org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration,"
+            + "org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration,"
+            + "org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration,"
+            + "org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration,"
+            + "org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration",
+    "marketplace.security.enabled=false",
+    "marketplace.kafka.enabled=false",
+    "marketplace.redis.enabled=false",
+    "marketplace.outbox.enabled=false"
 })
 class AiOllamaHealthIntegrationTest {
 
     private static MockWebServer mockOllama;
+
+    @MockBean
+    private com.enterprise.marketplace.aiservice.service.impl.AiServiceImpl aiServiceImpl;
+
+    @MockBean
+    private com.enterprise.marketplace.aiservice.repository.AiPromptTemplateRepository promptTemplateRepository;
+
+    @MockBean
+    private com.enterprise.marketplace.aiservice.repository.AiChatSessionRepository chatSessionRepository;
+
+    @MockBean
+    private com.enterprise.marketplace.aiservice.repository.AiChatMessageRepository chatMessageRepository;
+
+    @MockBean
+    private com.enterprise.marketplace.aiservice.repository.AiGenerationLogRepository generationLogRepository;
+
+    @MockBean
+    private com.enterprise.marketplace.aiservice.repository.AiAuditRepository auditRepository;
+
+    @MockBean
+    private com.enterprise.marketplace.aiservice.repository.OutboxEventRepository outboxEventRepository;
 
     @BeforeAll
     static void startMockOllama() throws IOException {

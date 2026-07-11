@@ -47,7 +47,36 @@
         { "name": "Get Notification By ID", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/notifications/{{notificationId}}" } },
         { "name": "Get By Request ID", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/notifications/request/{{requestId}}" } },
         { "name": "Get By Recipient", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/notifications/recipient/{{recipientId}}?page=0&size=20" } },
-        { "name": "Get By Status PENDING", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/notifications/status/PENDING?page=0&size=20" } },
+        { "name": "Get By Status CREATED", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/notifications/status/CREATED?page=0&size=20" } },
+        { "name": "List Notifications", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/notifications?page=0&size=20" } },
+        {
+          "name": "Send Email Notification",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Idempotency-Key", "value": "{{idempotencyKey}}" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"requestId\": \"{{requestId}}-email\",\n  \"notificationType\": \"SYSTEM_ALERT\",\n  \"channel\": \"EMAIL\",\n  \"recipientId\": \"{{recipientId}}\",\n  \"recipientAddress\": \"user@example.com\",\n  \"templateCode\": \"SYSTEM_ALERT\",\n  \"templateVariables\": { \"message\": \"Test alert\" }\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/notifications/send"
+          }
+        },
+        {
+          "name": "Bulk Retry Notifications",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"notificationIds\": [\"{{notificationId}}\"]\n}" },
+            "url": "{{baseUrl}}/api/v1/notifications/retry"
+          }
+        },
         {
           "name": "Retry Notification",
           "request": {
@@ -69,7 +98,7 @@
     {
       "name": "Inbox",
       "item": [
-        { "name": "Get Inbox", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/inbox/{{recipientId}}?page=0&size=20" } }
+        { "name": "Get Inbox", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/inbox/recipient/{{recipientId}}?page=0&size=20" } }
       ]
     },
     {

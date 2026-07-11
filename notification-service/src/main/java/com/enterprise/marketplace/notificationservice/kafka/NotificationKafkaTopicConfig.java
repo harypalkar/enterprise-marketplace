@@ -50,6 +50,41 @@ public class NotificationKafkaTopicConfig {
     }
 
     @Bean
+    public NewTopic notificationRetryTopic() {
+        return TopicBuilder.name(NotificationKafkaTopics.NOTIFICATION_RETRY).partitions(3).replicas(1).build();
+    }
+
+    @Bean
+    public NewTopic productCreatedTopic() {
+        return TopicBuilder.name(NotificationKafkaTopics.PRODUCT_CREATED).partitions(3).replicas(1).build();
+    }
+
+    @Bean
+    public NewTopic productUpdatedTopic() {
+        return TopicBuilder.name(NotificationKafkaTopics.PRODUCT_UPDATED).partitions(3).replicas(1).build();
+    }
+
+    @Bean
+    public NewTopic sellerApprovedTopic() {
+        return TopicBuilder.name(NotificationKafkaTopics.SELLER_APPROVED).partitions(3).replicas(1).build();
+    }
+
+    @Bean
+    public NewTopic buyerRegisteredTopic() {
+        return TopicBuilder.name(NotificationKafkaTopics.BUYER_REGISTERED).partitions(3).replicas(1).build();
+    }
+
+    @Bean
+    public NewTopic inventoryLowTopic() {
+        return TopicBuilder.name(NotificationKafkaTopics.INVENTORY_LOW).partitions(3).replicas(1).build();
+    }
+
+    @Bean
+    public NewTopic subscriptionExpiredTopic() {
+        return TopicBuilder.name(NotificationKafkaTopics.SUBSCRIPTION_EXPIRED).partitions(3).replicas(1).build();
+    }
+
+    @Bean
     public NewTopic notificationDeadLetterTopic() {
         return TopicBuilder.name(NotificationKafkaTopics.DEAD_LETTER).partitions(3).replicas(1).build();
     }

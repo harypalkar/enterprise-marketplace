@@ -1,8 +1,15 @@
 package com.enterprise.marketplace.notificationservice;
 
 import com.enterprise.marketplace.notificationservice.audit.NotificationAuditService;
+import com.enterprise.marketplace.notificationservice.audit.NotificationHistoryService;
+import com.enterprise.marketplace.notificationservice.repository.NotificationChannelRepository;
+import com.enterprise.marketplace.notificationservice.repository.NotificationHistoryRepository;
 import com.enterprise.marketplace.notificationservice.repository.NotificationInboxRepository;
 import com.enterprise.marketplace.notificationservice.repository.NotificationRepository;
+import com.enterprise.marketplace.notificationservice.repository.NotificationRetryRepository;
+import com.enterprise.marketplace.notificationservice.service.NotificationChannelConfigService;
+import com.enterprise.marketplace.notificationservice.service.NotificationRateLimitService;
+import com.enterprise.marketplace.notificationservice.service.NotificationRetryService;
 import com.enterprise.marketplace.notificationservice.service.impl.NotificationServiceImpl;
 import com.enterprise.marketplace.notificationservice.validation.NotificationRequestValidator;
 import org.junit.jupiter.api.Test;
@@ -40,6 +47,27 @@ class NotificationServiceApplicationTest {
 
     @MockBean
     private NotificationInboxRepository notificationInboxRepository;
+
+    @MockBean
+    private NotificationHistoryRepository notificationHistoryRepository;
+
+    @MockBean
+    private NotificationChannelRepository notificationChannelRepository;
+
+    @MockBean
+    private NotificationRetryRepository notificationRetryRepository;
+
+    @MockBean
+    private NotificationHistoryService notificationHistoryService;
+
+    @MockBean
+    private NotificationRetryService notificationRetryService;
+
+    @MockBean
+    private NotificationRateLimitService notificationRateLimitService;
+
+    @MockBean
+    private NotificationChannelConfigService notificationChannelConfigService;
 
     @Test
     void contextLoads() {}

@@ -1,0 +1,95 @@
+{
+  "info": {
+    "name": "Enterprise Marketplace - AI Service",
+    "description": "Ollama-powered AI chat, description generation, search interpret, recommendations",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8091" },
+    { "key": "gatewayUrl", "value": "http://localhost:8080/api/ai" },
+    { "key": "productId", "value": "00000000-0000-0000-0000-000000000001" },
+    { "key": "accessToken", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        { "name": "Bootstrap Health", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/bootstrap/health" } },
+        { "name": "Ollama Health", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/infrastructure/health/ollama" } }
+      ]
+    },
+    {
+      "name": "AI",
+      "item": [
+        {
+          "name": "Chat",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Find industrial steel suppliers with MOQ under 1000 kg\",\n  \"userId\": \"buyer-001\",\n  \"userRole\": \"BUYER\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/ai/chat"
+          }
+        },
+        {
+          "name": "Generate Description",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"name\": \"Industrial Steel Rod\",\n  \"sku\": \"STEEL-ROD-001\",\n  \"categoryId\": \"00000000-0000-0000-0000-000000000002\",\n  \"attributes\": { \"grade\": \"Fe500\", \"length\": \"12m\" }\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/ai/generate/description"
+          }
+        },
+        {
+          "name": "Interpret Search",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"steel rods under 2000 rupees per kg in Mumbai\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/ai/search/interpret"
+          }
+        },
+        {
+          "name": "Recommendations",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/ai/recommendations?buyerId=buyer-001&limit=5"
+          }
+        },
+        {
+          "name": "Chat via Gateway",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"What B2B categories are trending?\",\n  \"userId\": \"buyer-001\",\n  \"userRole\": \"BUYER\"\n}"
+            },
+            "url": "{{gatewayUrl}}/api/v1/ai/chat"
+          }
+        }
+      ]
+    }
+  ]
+}

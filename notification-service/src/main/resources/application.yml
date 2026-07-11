@@ -130,6 +130,8 @@ marketplace:
     password: ${REDIS_PASSWORD:}
     timeout-ms: ${REDIS_TIMEOUT_MS:3000}
     template-cache-ttl-seconds: ${NOTIFICATION_TEMPLATE_CACHE_TTL_SECONDS:3600}
+    channel-cache-ttl-seconds: ${NOTIFICATION_CHANNEL_CACHE_TTL_SECONDS:3600}
+    preference-cache-ttl-seconds: ${NOTIFICATION_PREFERENCE_CACHE_TTL_SECONDS:86400}
   kafka:
     enabled: ${KAFKA_ENABLED:true}
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
@@ -140,11 +142,21 @@ marketplace:
     max-retries: ${OUTBOX_MAX_RETRIES:5}
   notification:
     dispatch-interval-ms: ${NOTIFICATION_DISPATCH_INTERVAL_MS:3000}
+    expiry-interval-ms: ${NOTIFICATION_EXPIRY_INTERVAL_MS:60000}
     max-delivery-retries: ${NOTIFICATION_MAX_DELIVERY_RETRIES:3}
+    expiry-hours: ${NOTIFICATION_EXPIRY_HOURS:72}
     default-from-email: ${NOTIFICATION_FROM_EMAIL:noreply@marketplace.local}
+    email-provider: ${NOTIFICATION_EMAIL_PROVIDER:SMTP}
+    aws-region: ${AWS_REGION:ap-south-1}
     sms-gateway-url: ${SMS_GATEWAY_URL:}
     push-gateway-url: ${PUSH_GATEWAY_URL:}
     webhook-timeout-ms: ${WEBHOOK_TIMEOUT_MS:5000}
+    twilio-enabled: ${TWILIO_ENABLED:false}
+    twilio-account-sid: ${TWILIO_ACCOUNT_SID:}
+    twilio-auth-token: ${TWILIO_AUTH_TOKEN:}
+    twilio-from-number: ${TWILIO_FROM_NUMBER:}
+    fcm-enabled: ${FCM_ENABLED:false}
+    fcm-service-account-path: ${FCM_SERVICE_ACCOUNT_PATH:}
 
 keycloak:
   realm: ${KEYCLOAK_REALM:marketplace}
