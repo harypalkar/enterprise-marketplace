@@ -1,0 +1,112 @@
+{
+  "info": {
+    "name": "Enterprise Marketplace - Notification Service",
+    "description": "Notification API with multi-channel delivery, JWT, and idempotency",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8089" },
+    { "key": "gatewayUrl", "value": "http://localhost:8080/api/notifications" },
+    { "key": "notificationId", "value": "" },
+    { "key": "requestId", "value": "{{$guid}}" },
+    { "key": "recipientId", "value": "postman-user" },
+    { "key": "idempotencyKey", "value": "{{$guid}}" },
+    { "key": "accessToken", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        { "name": "Actuator Health", "request": { "method": "GET", "url": "{{baseUrl}}/actuator/health" } },
+        { "name": "Bootstrap Health", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/bootstrap/health" } }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "Create IN_APP Notification",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": ["if (pm.response.code === 201) {", "  pm.collectionVariables.set('notificationId', pm.response.json().data.id);", "  pm.collectionVariables.set('requestId', pm.response.json().data.requestId);", "}"] }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Idempotency-Key", "value": "{{idempotencyKey}}" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"requestId\": \"{{requestId}}\",\n  \"correlationId\": \"{{$guid}}\",\n  \"notificationType\": \"WORKFLOW_COMPLETED\",\n  \"channel\": \"IN_APP\",\n  \"recipientId\": \"{{recipientId}}\",\n  \"subject\": \"Workflow Completed\",\n  \"body\": \"Your workflow has completed.\",\n  \"templateCode\": \"WORKFLOW_COMPLETED\",\n  \"templateVariables\": { \"workflowId\": \"wf-123\", \"aggregateType\": \"PRODUCT\" }\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/notifications"
+          }
+        },
+        { "name": "Get Notification By ID", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/notifications/{{notificationId}}" } },
+        { "name": "Get By Request ID", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/notifications/request/{{requestId}}" } },
+        { "name": "Get By Recipient", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/notifications/recipient/{{recipientId}}?page=0&size=20" } },
+        { "name": "Get By Status PENDING", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/notifications/status/PENDING?page=0&size=20" } },
+        {
+          "name": "Retry Notification",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/notifications/{{notificationId}}/retry"
+          }
+        },
+        {
+          "name": "Soft Delete",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/notifications/{{notificationId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Inbox",
+      "item": [
+        { "name": "Get Inbox", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/inbox/{{recipientId}}?page=0&size=20" } }
+      ]
+    },
+    {
+      "name": "Negative Tests",
+      "item": [
+        {
+          "name": "Duplicate RequestId (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Idempotency-Key", "value": "{{$guid}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"requestId\": \"{{requestId}}\",\n  \"notificationType\": \"CUSTOM\",\n  \"channel\": \"IN_APP\",\n  \"recipientId\": \"{{recipientId}}\",\n  \"body\": \"duplicate\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/notifications"
+          }
+        },
+        {
+          "name": "Missing Idempotency Key (400)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"requestId\": \"{{$guid}}\",\n  \"notificationType\": \"CUSTOM\",\n  \"channel\": \"IN_APP\",\n  \"recipientId\": \"user\",\n  \"body\": \"test\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/notifications"
+          }
+        },
+        {
+          "name": "Not Found (404)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/notifications/00000000-0000-0000-0000-000000000099" }
+        }
+      ]
+    }
+  ]
+}

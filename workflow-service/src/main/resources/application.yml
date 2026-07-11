@@ -8,14 +8,25 @@
       write-dates-as-timestamps: false
     default-property-inclusion: non_null
   datasource:
-    url: ${NEON_DB_URL:jdbc:postgresql://localhost:5432/workflow_service}
+    url: ${NEON_DB_URL:jdbc:postgresql://localhost:5432/workflow_service?sslmode=${NEON_DB_SSL_MODE:prefer}}
     username: ${NEON_DB_USER:marketplace}
     password: ${NEON_DB_PASSWORD:marketplace}
     hikari:
-      maximum-pool-size: 10
-      minimum-idle: 2
+      maximum-pool-size: ${NEON_DB_POOL_MAX:10}
+      minimum-idle: ${NEON_DB_POOL_MIN:2}
       pool-name: workflow-service-pool
-
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      data-source-properties:
+        ssl: ${NEON_DB_SSL:true}
+        sslmode: ${NEON_DB_SSL_MODE:prefer}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8180/realms/marketplace}
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://localhost:8180/realms/marketplace/protocol/openid-connect/certs}
   jpa:
     open-in-view: false
     hibernate:
@@ -25,10 +36,32 @@
         jdbc:
           time_zone: UTC
   flyway:
-    enabled: false
+    enabled: ${FLYWAY_ENABLED:true}
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: ${REDIS_TIMEOUT:3000ms}
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      acks: all
+      retries: 3
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      properties:
+        enable.idempotence: true
+    consumer:
+      group-id: ${KAFKA_CONSUMER_GROUP:workflow-service}
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 
 server:
-  port: 8088
+  port: ${WORKFLOW_SERVICE_PORT:8088}
   shutdown: graceful
   error:
     include-message: never
@@ -48,6 +81,9 @@ management:
   metrics:
     tags:
       application: ${spring.application.name}
+    export:
+      prometheus:
+        enabled: true
   tracing:
     sampling:
       probability: ${TRACING_SAMPLING_PROBABILITY:1.0}
@@ -72,3 +108,28 @@ logging:
 marketplace:
   service:
     name: workflow-service
+  api:
+    version: v1
+  security:
+    enabled: ${MARKETPLACE_SECURITY_ENABLED:true}
+  redis:
+    enabled: ${REDIS_ENABLED:true}
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:}
+    timeout-ms: ${REDIS_TIMEOUT_MS:3000}
+    workflow-cache-ttl-seconds: ${WORKFLOW_CACHE_TTL_SECONDS:3600}
+  kafka:
+    enabled: ${KAFKA_ENABLED:true}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer-group: ${KAFKA_CONSUMER_GROUP:workflow-service}
+  outbox:
+    enabled: ${OUTBOX_ENABLED:true}
+    publish-interval-ms: ${OUTBOX_PUBLISH_INTERVAL_MS:5000}
+    max-retries: ${OUTBOX_MAX_RETRIES:5}
+
+keycloak:
+  realm: ${KEYCLOAK_REALM:marketplace}
+  auth-server-url: ${KEYCLOAK_AUTH_SERVER_URL:http://localhost:8180}
+  client-id: ${KEYCLOAK_CLIENT_ID:marketplace-services}
+  client-secret: ${KEYCLOAK_CLIENT_SECRET:marketplace-services-secret}

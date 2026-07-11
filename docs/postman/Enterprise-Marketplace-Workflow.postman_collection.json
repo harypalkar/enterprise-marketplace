@@ -1,0 +1,214 @@
+{
+  "info": {
+    "name": "Enterprise Marketplace - Workflow Service",
+    "description": "Workflow lifecycle API with JWT, idempotency, and status transitions",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8088" },
+    { "key": "gatewayUrl", "value": "http://localhost:8080/api/workflows" },
+    { "key": "workflowId", "value": "" },
+    { "key": "requestId", "value": "{{$guid}}" },
+    { "key": "idempotencyKey", "value": "{{$guid}}" },
+    { "key": "accessToken", "value": "" },
+    { "key": "aggregateId", "value": "00000000-0000-0000-0000-000000000001" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Actuator Health",
+          "request": { "method": "GET", "url": "{{baseUrl}}/actuator/health" }
+        },
+        {
+          "name": "Bootstrap Health",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/bootstrap/health" }
+        }
+      ]
+    },
+    {
+      "name": "Workflows",
+      "item": [
+        {
+          "name": "Create Workflow",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "if (pm.response.code === 201) {",
+                "  pm.collectionVariables.set('workflowId', pm.response.json().data.id);",
+                "  pm.collectionVariables.set('requestId', pm.response.json().data.requestId);",
+                "}"
+              ]
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Idempotency-Key", "value": "{{idempotencyKey}}" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "X-Correlation-Id", "value": "{{$guid}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"requestId\": \"{{requestId}}\",\n  \"correlationId\": \"{{$guid}}\",\n  \"aggregateType\": \"PRODUCT\",\n  \"aggregateId\": \"{{aggregateId}}\",\n  \"operationType\": \"CREATE\",\n  \"sourceSystem\": \"postman\",\n  \"initiatedBy\": \"postman-user\",\n  \"message\": \"Product creation workflow\",\n  \"initialStatus\": \"INITIAL\",\n  \"metadata\": { \"sku\": \"POSTMAN-SKU-001\" }\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/workflows"
+          }
+        },
+        {
+          "name": "Get Workflow By ID",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/workflows/{{workflowId}}" }
+        },
+        {
+          "name": "Get Workflow By Request ID",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/workflows/request/{{requestId}}" }
+        },
+        {
+          "name": "Search By Status (INITIAL)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/workflows/status/INITIAL?page=0&size=20" }
+        },
+        {
+          "name": "Update Workflow",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Idempotency-Key", "value": "{{$guid}}" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Updated via Postman\",\n  \"metadata\": { \"updated\": true }\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/workflows/{{workflowId}}"
+          }
+        },
+        {
+          "name": "Change Status to RECEIVED",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Idempotency-Key", "value": "{{$guid}}" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetStatus\": \"RECEIVED\",\n  \"reason\": \"Workflow received for processing\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/workflows/{{workflowId}}/status"
+          }
+        },
+        {
+          "name": "Change Status to TECHNICAL_VALIDATION",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Idempotency-Key", "value": "{{$guid}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetStatus\": \"TECHNICAL_VALIDATION\",\n  \"reason\": \"Starting technical validation\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/workflows/{{workflowId}}/status"
+          }
+        },
+        {
+          "name": "Soft Delete Workflow",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/workflows/{{workflowId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Negative Tests",
+      "item": [
+        {
+          "name": "Create Duplicate RequestId (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Idempotency-Key", "value": "{{$guid}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"requestId\": \"{{requestId}}\",\n  \"aggregateType\": \"PRODUCT\",\n  \"aggregateId\": \"{{aggregateId}}\",\n  \"operationType\": \"CREATE\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/workflows"
+          }
+        },
+        {
+          "name": "Invalid Status Transition (422)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetStatus\": \"COMPLETED\",\n  \"reason\": \"Invalid jump from INITIAL to COMPLETED\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/workflows/{{workflowId}}/status"
+          }
+        },
+        {
+          "name": "Get Non-Existent Workflow (404)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/workflows/00000000-0000-0000-0000-000000000099"
+          }
+        },
+        {
+          "name": "Create Without Idempotency Key (400)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"requestId\": \"{{$guid}}\",\n  \"aggregateType\": \"PRODUCT\",\n  \"aggregateId\": \"{{aggregateId}}\",\n  \"operationType\": \"CREATE\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/workflows"
+          }
+        },
+        {
+          "name": "Missing Required Fields (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Idempotency-Key", "value": "{{$guid}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": "{{baseUrl}}/api/v1/workflows"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Gateway",
+      "item": [
+        {
+          "name": "Create Workflow via Gateway",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Idempotency-Key", "value": "{{$guid}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"requestId\": \"{{$guid}}\",\n  \"aggregateType\": \"PRODUCT\",\n  \"aggregateId\": \"{{aggregateId}}\",\n  \"operationType\": \"CREATE\",\n  \"initialStatus\": \"INITIAL\"\n}"
+            },
+            "url": "{{gatewayUrl}}/api/v1/workflows"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,166 @@
+{
+  "info": {
+    "name": "Enterprise Marketplace - Subscription Service",
+    "description": "Subscription plan catalog and lifecycle API with JWT and idempotency",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8093" },
+    { "key": "gatewayUrl", "value": "http://localhost:8080/api/subscriptions" },
+    { "key": "planId", "value": "11111111-1111-1111-1111-111111111002" },
+    { "key": "subscriptionId", "value": "" },
+    { "key": "requestId", "value": "{{$guid}}" },
+    { "key": "correlationId", "value": "{{$guid}}" },
+    { "key": "sellerId", "value": "00000000-0000-0000-0000-000000000010" },
+    { "key": "buyerId", "value": "00000000-0000-0000-0000-000000000020" },
+    { "key": "idempotencyKey", "value": "{{$guid}}" },
+    { "key": "accessToken", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        { "name": "Actuator Health", "request": { "method": "GET", "url": "{{baseUrl}}/actuator/health" } },
+        { "name": "Bootstrap Health", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/bootstrap/health" } }
+      ]
+    },
+    {
+      "name": "Plans",
+      "item": [
+        { "name": "List Plans (Public)", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/plans" } },
+        { "name": "Get Plan By ID (Public)", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/plans/{{planId}}" } },
+        { "name": "Get Plan By Code (Public)", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/plans/code/BASIC" } },
+        {
+          "name": "Create Plan (ADMIN)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"planCode\": \"ENTERPRISE\",\n  \"name\": \"Enterprise Plan\",\n  \"tier\": \"PREMIUM\",\n  \"price\": 99.99,\n  \"currency\": \"USD\",\n  \"billingCycle\": \"MONTHLY\",\n  \"features\": { \"maxListings\": -1, \"support\": \"dedicated\" }\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/plans"
+          }
+        },
+        {
+          "name": "Update Plan (ADMIN)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Basic Plan Updated\",\n  \"tier\": \"BASIC\",\n  \"price\": 12.99,\n  \"currency\": \"USD\",\n  \"billingCycle\": \"MONTHLY\",\n  \"features\": { \"maxListings\": 75, \"support\": \"email\" },\n  \"active\": true\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/plans/{{planId}}"
+          }
+        },
+        {
+          "name": "Delete Plan (ADMIN)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/plans/{{planId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Subscriptions",
+      "item": [
+        {
+          "name": "Subscribe",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": ["if (pm.response.code === 201) {", "  pm.collectionVariables.set('subscriptionId', pm.response.json().data.id);", "  pm.collectionVariables.set('requestId', pm.response.json().data.requestId);", "}"] }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Idempotency-Key", "value": "{{idempotencyKey}}" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"requestId\": \"{{requestId}}\",\n  \"correlationId\": \"{{correlationId}}\",\n  \"sellerId\": \"{{sellerId}}\",\n  \"buyerId\": \"{{buyerId}}\",\n  \"planCode\": \"BASIC\",\n  \"autoRenew\": true\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/subscriptions"
+          }
+        },
+        { "name": "Get Subscription By ID", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": "{{baseUrl}}/api/v1/subscriptions/{{subscriptionId}}" } },
+        { "name": "List By Seller", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": "{{baseUrl}}/api/v1/subscriptions/seller/{{sellerId}}?page=0&size=20" } },
+        { "name": "List By Buyer", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": "{{baseUrl}}/api/v1/subscriptions/buyer/{{buyerId}}?page=0&size=20" } },
+        {
+          "name": "Update Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"SUSPENDED\"\n}" },
+            "url": "{{baseUrl}}/api/v1/subscriptions/{{subscriptionId}}/status"
+          }
+        },
+        {
+          "name": "Renew Subscription",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/subscriptions/{{subscriptionId}}/renew"
+          }
+        },
+        {
+          "name": "Cancel Subscription",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/subscriptions/{{subscriptionId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Negative Tests",
+      "item": [
+        {
+          "name": "Duplicate Request ID (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Idempotency-Key", "value": "{{$guid}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"requestId\": \"{{requestId}}\",\n  \"sellerId\": \"{{sellerId}}\",\n  \"buyerId\": \"{{buyerId}}\",\n  \"planCode\": \"BASIC\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/subscriptions"
+          }
+        },
+        {
+          "name": "Missing Idempotency Key (400)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"requestId\": \"{{$guid}}\",\n  \"sellerId\": \"{{sellerId}}\",\n  \"buyerId\": \"{{buyerId}}\",\n  \"planCode\": \"BASIC\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/subscriptions"
+          }
+        },
+        {
+          "name": "Subscription Not Found (404)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/subscriptions/00000000-0000-0000-0000-000000000099" }
+        }
+      ]
+    }
+  ]
+}

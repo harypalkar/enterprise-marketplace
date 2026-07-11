@@ -1,0 +1,101 @@
+{
+  "info": {
+    "name": "Enterprise Marketplace - Report Service",
+    "description": "Report generation API with JWT and idempotency",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8094" },
+    { "key": "jobId", "value": "" },
+    { "key": "requestId", "value": "{{$guid}}" },
+    { "key": "correlationId", "value": "{{$guid}}" },
+    { "key": "idempotencyKey", "value": "{{$guid}}" },
+    { "key": "accessToken", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        { "name": "Actuator Health", "request": { "method": "GET", "url": "{{baseUrl}}/actuator/health" } }
+      ]
+    },
+    {
+      "name": "Definitions",
+      "item": [
+        { "name": "List Report Definitions", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": "{{baseUrl}}/api/v1/reports/definitions" } },
+        { "name": "Get SALES_SUMMARY Definition", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": "{{baseUrl}}/api/v1/reports/definitions/SALES_SUMMARY" } }
+      ]
+    },
+    {
+      "name": "Jobs",
+      "item": [
+        {
+          "name": "Create Sales Summary Job",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": ["if (pm.response.code === 201) {", "  pm.collectionVariables.set('jobId', pm.response.json().data.id);", "  pm.collectionVariables.set('requestId', pm.response.json().data.requestId);", "}"] }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Idempotency-Key", "value": "{{idempotencyKey}}" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"requestId\": \"{{requestId}}\",\n  \"correlationId\": \"{{correlationId}}\",\n  \"reportCode\": \"SALES_SUMMARY\",\n  \"requestedBy\": \"postman-user\",\n  \"parameters\": {\n    \"fromDate\": \"2026-07-01\",\n    \"toDate\": \"2026-07-09\"\n  }\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/reports/jobs"
+          }
+        },
+        { "name": "Get Job By ID", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": "{{baseUrl}}/api/v1/reports/jobs/{{jobId}}" } },
+        { "name": "List Jobs", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": "{{baseUrl}}/api/v1/reports/jobs?page=0&size=20" } },
+        { "name": "Get Job Result", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": "{{baseUrl}}/api/v1/reports/jobs/{{jobId}}/result" } },
+        {
+          "name": "Cancel Job (ADMIN)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/reports/jobs/{{jobId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Negative Tests",
+      "item": [
+        {
+          "name": "Missing Required Parameters (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Idempotency-Key", "value": "{{$guid}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"requestId\": \"{{$guid}}\",\n  \"reportCode\": \"SALES_SUMMARY\",\n  \"requestedBy\": \"postman-user\",\n  \"parameters\": {}\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/reports/jobs"
+          }
+        },
+        {
+          "name": "Unknown Report Code (404)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Idempotency-Key", "value": "{{$guid}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"requestId\": \"{{$guid}}\",\n  \"reportCode\": \"UNKNOWN_REPORT\",\n  \"requestedBy\": \"postman-user\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/reports/jobs"
+          }
+        }
+      ]
+    }
+  ]
+}

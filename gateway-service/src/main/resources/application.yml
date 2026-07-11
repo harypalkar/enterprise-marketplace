@@ -66,6 +66,42 @@
             - Path=/api/pricing/**
           filters:
             - StripPrefix=2
+        - id: workflow-service
+          uri: http://${WORKFLOW_SERVICE_HOST:localhost}:${WORKFLOW_SERVICE_PORT:8088}
+          predicates:
+            - Path=/api/workflows/**
+          filters:
+            - StripPrefix=2
+        - id: notification-service
+          uri: http://${NOTIFICATION_SERVICE_HOST:localhost}:${NOTIFICATION_SERVICE_PORT:8089}
+          predicates:
+            - Path=/api/notifications/**
+          filters:
+            - StripPrefix=2
+        - id: audit-service
+          uri: http://${AUDIT_SERVICE_HOST:localhost}:${AUDIT_SERVICE_PORT:8092}
+          predicates:
+            - Path=/api/audits/**
+          filters:
+            - StripPrefix=2
+        - id: subscription-service
+          uri: http://${SUBSCRIPTION_SERVICE_HOST:localhost}:${SUBSCRIPTION_SERVICE_PORT:8093}
+          predicates:
+            - Path=/api/subscriptions/**
+          filters:
+            - StripPrefix=2
+        - id: report-service
+          uri: http://${REPORT_SERVICE_HOST:localhost}:${REPORT_SERVICE_PORT:8094}
+          predicates:
+            - Path=/api/reports/**
+          filters:
+            - StripPrefix=2
+        - id: admin-service
+          uri: http://${ADMIN_SERVICE_HOST:localhost}:${ADMIN_SERVICE_PORT:8095}
+          predicates:
+            - Path=/api/admin/**
+          filters:
+            - StripPrefix=2
         - id: ai-service
           uri: http://${AI_SERVICE_HOST:localhost}:${AI_SERVICE_PORT:8091}
           predicates:

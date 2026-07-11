@@ -1,0 +1,100 @@
+{
+  "info": {
+    "name": "Enterprise Marketplace - Audit Service",
+    "description": "Central audit trail API with JWT and idempotency",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8092" },
+    { "key": "gatewayUrl", "value": "http://localhost:8080/api/audits" },
+    { "key": "auditId", "value": "" },
+    { "key": "requestId", "value": "{{$guid}}" },
+    { "key": "correlationId", "value": "{{$guid}}" },
+    { "key": "idempotencyKey", "value": "{{$guid}}" },
+    { "key": "accessToken", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        { "name": "Actuator Health", "request": { "method": "GET", "url": "{{baseUrl}}/actuator/health" } },
+        { "name": "Bootstrap Health", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/bootstrap/health" } }
+      ]
+    },
+    {
+      "name": "Audits",
+      "item": [
+        {
+          "name": "Create Audit Record",
+          "event": [{
+            "listen": "test",
+            "script": { "exec": ["if (pm.response.code === 201) {", "  pm.collectionVariables.set('auditId', pm.response.json().data.id);", "  pm.collectionVariables.set('requestId', pm.response.json().data.requestId);", "}"] }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Idempotency-Key", "value": "{{idempotencyKey}}" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"requestId\": \"{{requestId}}\",\n  \"correlationId\": \"{{correlationId}}\",\n  \"sourceService\": \"postman-test\",\n  \"aggregateType\": \"PRODUCT\",\n  \"aggregateId\": \"00000000-0000-0000-0000-000000000001\",\n  \"operation\": \"CREATE\",\n  \"actor\": \"postman-user\",\n  \"afterState\": { \"status\": \"CREATED\", \"sku\": \"TEST-SKU\" },\n  \"metadata\": { \"channel\": \"API\" }\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/audits"
+          }
+        },
+        { "name": "Get Audit By ID", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/audits/{{auditId}}" } },
+        { "name": "Get By Request ID", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/audits/request/{{requestId}}" } },
+        { "name": "Get Correlation Timeline", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/audits/correlation/{{correlationId}}" } },
+        { "name": "Search By Source Service", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/audits/source/postman-test?page=0&size=20" } },
+        { "name": "Search By Actor", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/audits/actor/postman-user?page=0&size=20" } },
+        { "name": "Advanced Search", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/audits/search?operation=CREATE&sourceService=postman-test&page=0&size=20" } },
+        {
+          "name": "Archive Audit (ADMIN)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/audits/{{auditId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Negative Tests",
+      "item": [
+        {
+          "name": "Duplicate Event Key (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Idempotency-Key", "value": "{{$guid}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"requestId\": \"{{requestId}}\",\n  \"sourceService\": \"postman-test\",\n  \"operation\": \"CREATE\",\n  \"actor\": \"postman-user\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/audits"
+          }
+        },
+        {
+          "name": "Missing Idempotency Key (400)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"requestId\": \"{{$guid}}\",\n  \"sourceService\": \"test\",\n  \"operation\": \"CREATE\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/audits"
+          }
+        },
+        {
+          "name": "Not Found (404)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/audits/00000000-0000-0000-0000-000000000099" }
+        }
+      ]
+    }
+  ]
+}

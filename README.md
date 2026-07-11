@@ -6,7 +6,7 @@ Production-ready B2B marketplace backend platform (IndiaMART-like) built with Ja
 
 This repository contains the **Enterprise Marketplace Platform** — a Maven multi-module monorepo with shared libraries, API gateway, domain microservice scaffolds, and a complete **Infrastructure Foundation** (Docker Compose, Keycloak, Kafka, Redis, Elasticsearch, observability stack).
 
-Business APIs for the core B2B domain (product, seller, buyer, category, inventory, pricing) are implemented with full CRUD. Remaining scaffolds (workflow, notification, audit, etc.) will be added in subsequent milestones.
+Business APIs for the core B2B domain (product, seller, buyer, category, inventory, pricing) are implemented with full CRUD. **Workflow**, **Notification**, **Audit**, **Subscription**, **Report**, and **Admin** services are production-ready. Remaining scaffolds (search, ai) will be added in subsequent milestones.
 
 ## Technology Stack
 
@@ -40,14 +40,14 @@ Business APIs for the core B2B domain (product, seller, buyer, category, invento
 | `category-service` | 8085 | Category taxonomy (CRUD) |
 | `inventory-service` | 8086 | Inventory management (CRUD + reserve/release) |
 | `pricing-service` | 8087 | Pricing engine (CRUD) |
-| `workflow-service` | 8088 | Business workflows (scaffold) |
-| `notification-service` | 8089 | Notifications (scaffold) |
+| `workflow-service` | 8088 | Business workflow lifecycle (production-ready) |
+| `notification-service` | 8089 | Multi-channel notifications (production-ready) |
 | `search-service` | 8090 | Elasticsearch integration |
 | `ai-service` | 8091 | Ollama integration |
-| `audit-service` | 8092 | Audit trail (scaffold) |
-| `subscription-service` | 8093 | Subscriptions (scaffold) |
-| `report-service` | 8094 | Reporting (scaffold) |
-| `admin-service` | 8095 | Administration (scaffold) |
+| `audit-service` | 8092 | Central audit trail (production-ready) |
+| `subscription-service` | 8093 | Subscriptions and billing plans (production-ready) |
+| `report-service` | 8094 | Report generation and analytics (production-ready) |
+| `admin-service` | 8095 | Platform administration (production-ready) |
 
 ## Prerequisites
 
