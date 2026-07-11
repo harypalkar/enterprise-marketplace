@@ -3,6 +3,8 @@ import { useAppContext } from '../context/AppContext';
 
 const NAV = [
   { to: '/', label: 'Dashboard' },
+  { to: '/setup', label: 'Setup Guide' },
+  { to: '/services', label: 'All Services' },
   { to: '/e2e', label: 'E2E Flow' },
   { to: '/catalog', label: 'Catalog' },
   { to: '/marketplace', label: 'Marketplace' },

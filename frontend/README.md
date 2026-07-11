@@ -36,13 +36,15 @@ The Vite dev server proxies `/api/*` to `http://localhost:8080` (gateway).
 
 ## Pages
 
-| Page | Purpose |
-|------|---------|
-| **Dashboard** | Health check all microservices via gateway |
-| **E2E Flow** | Step-by-step wizard: seller → category → buyer → product → search → AI → async verification |
-| **Catalog** | Seller, category, product, inventory, pricing APIs |
-| **Marketplace** | Buyer registration, Elasticsearch search, AI chat |
-| **Platform** | Workflow, notification, audit, subscription, report, admin |
+| Page | URL | Purpose |
+|------|-----|---------|
+| **Setup Guide** | `/setup` | 3-terminal minimal startup instructions |
+| **Dashboard** | `/` | Health check all microservices via gateway |
+| **All Services** | `/services` | Individual test button for every microservice API |
+| **E2E Flow** | `/e2e` | Step-by-step wizard: seller → category → buyer → product → search → AI → async verification |
+| **Catalog** | `/catalog` | Seller, category, product, inventory, pricing APIs |
+| **Marketplace** | `/marketplace` | Buyer registration, Elasticsearch search, AI chat |
+| **Platform** | `/platform` | Workflow, notification, audit, subscription, report, admin |
 
 ## Authentication
 
@@ -58,4 +60,5 @@ npm run preview
 
 ## Documentation
 
+- [Minimal Setup Guide](../docs/minimal-setup-guide.md)
 - [End-to-End Testing Guide](../docs/end-to-end-testing-guide.md)

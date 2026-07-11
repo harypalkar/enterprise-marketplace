@@ -37,6 +37,14 @@ export async function checkServiceHealth(serviceId: string) {
   }
 }
 
+export async function checkElasticsearchHealth() {
+  return apiRequest<unknown>(gatewayUrl(search, '/api/v1/infrastructure/health/elasticsearch'));
+}
+
+export async function checkAiHealth() {
+  return apiRequest<unknown>(gatewayUrl(ai, '/api/v1/infrastructure/health/ollama'));
+}
+
 export function buildProductPayload(sellerId: string, sku: string, name: string) {
   const idempotencyKey = newIdempotencyKey();
   return {
@@ -142,8 +150,84 @@ export async function createProduct(token: Token, sellerId: string, suffix: stri
   });
 }
 
+export async function getProductById(token: Token, productId: string) {
+  return apiRequest<unknown>(`${gatewayUrl(product, product.apiPath)}/${productId}`, { token });
+}
+
 export async function listProducts(token: Token) {
   return apiRequest<unknown>(`${gatewayUrl(product, product.apiPath)}?page=0&size=10`, { token });
+}
+
+export async function createInventory(token: Token, productId: string, sellerId: string) {
+  return apiRequest<unknown>(gatewayUrl(inventory, inventory.apiPath), {
+    method: 'POST',
+    token,
+    idempotencyKey: newIdempotencyKey(),
+    body: {
+      productId,
+      sellerId,
+      quantityAvailable: 250,
+      quantityReserved: 0,
+      reorderLevel: 20,
+      warehouseCode: 'WH-UI',
+      status: 'ACTIVE',
+    },
+  });
+}
+
+export async function createPricing(token: Token, productId: string, sellerId: string) {
+  return apiRequest<unknown>(gatewayUrl(pricing, pricing.apiPath), {
+    method: 'POST',
+    token,
+    idempotencyKey: newIdempotencyKey(),
+    body: {
+      productId,
+      sellerId,
+      unitPrice: 1750,
+      currency: 'INR',
+      minQuantity: 1,
+      discountPercent: 0,
+      validFrom: new Date().toISOString(),
+      status: 'ACTIVE',
+    },
+  });
+}
+
+export async function createWorkflow(token: Token, productId: string) {
+  return apiRequest<unknown>(gatewayUrl(workflow, workflow.apiPath), {
+    method: 'POST',
+    token,
+    idempotencyKey: newIdempotencyKey(),
+    body: {
+      requestId: newGuid(),
+      correlationId: newGuid(),
+      aggregateType: 'PRODUCT',
+      aggregateId: productId,
+      operationType: 'CREATE',
+      sourceSystem: 'marketplace-ui',
+      initiatedBy: 'ui-tester',
+      message: 'Workflow created from UI',
+      initialStatus: 'INITIATED',
+    },
+  });
+}
+
+export async function sendNotification(token: Token, recipientId: string) {
+  return apiRequest<unknown>(gatewayUrl(notification, `${notification.apiPath}/send`), {
+    method: 'POST',
+    token,
+    idempotencyKey: newIdempotencyKey(),
+    body: {
+      requestId: newGuid(),
+      correlationId: newGuid(),
+      notificationType: 'TRANSACTIONAL',
+      channel: 'EMAIL',
+      recipientId,
+      recipientAddress: `${recipientId}@marketplace.test`,
+      subject: 'UI Test Notification',
+      body: 'This notification was sent from the Marketplace UI tester.',
+    },
+  });
 }
 
 export async function searchProductsElasticsearch(token: Token, query: string) {
@@ -169,6 +253,24 @@ export async function aiInterpretSearch(token: Token, query: string) {
   });
 }
 
+export async function aiRecommendations(token: Token, buyerId?: string) {
+  const q = buyerId ? `?buyerId=${buyerId}&limit=5` : '?limit=5';
+  return apiRequest<unknown>(`${gatewayUrl(ai, ai.apiPath)}/recommendations${q}`, { token });
+}
+
+export async function aiGenerateDescription(token: Token, productId: string, name: string) {
+  return apiRequest<unknown>(gatewayUrl(ai, `${ai.apiPath}/generate/description`), {
+    method: 'POST',
+    token,
+    body: {
+      productId,
+      name,
+      sku: `SKU-${productId.slice(0, 8)}`,
+      attributes: { material: 'steel' },
+    },
+  });
+}
+
 export async function listNotifications(token: Token) {
   return apiRequest<unknown>(`${gatewayUrl(notification, notification.apiPath)}?page=0&size=10`, { token });
 }
@@ -185,12 +287,49 @@ export async function listSubscriptions(token: Token) {
   return apiRequest<unknown>(`${gatewayUrl(subscription, subscription.apiPath)}?page=0&size=10`, { token });
 }
 
+export async function listPlans(token: Token) {
+  return apiRequest<unknown>(gatewayUrl(subscription, '/api/v1/plans'), { token });
+}
+
+export async function createPlan(token: Token, suffix: string) {
+  return apiRequest<unknown>(gatewayUrl(subscription, '/api/v1/plans'), {
+    method: 'POST',
+    token,
+    idempotencyKey: newIdempotencyKey(),
+    body: {
+      planCode: `UI-${suffix}`,
+      name: `UI Plan ${suffix}`,
+      tier: 'STANDARD',
+      price: 999,
+      currency: 'INR',
+      billingCycle: 'MONTHLY',
+      features: { products: 100, users: 5 },
+    },
+  });
+}
+
 export async function listReports(token: Token) {
-  return apiRequest<unknown>(`${gatewayUrl(report, report.apiPath)}?page=0&size=10`, { token });
+  return listReportJobs(token);
+}
+
+export async function listReportJobs(token: Token) {
+  return apiRequest<unknown>(`${gatewayUrl(report, report.apiPath)}/jobs?page=0&size=10`, { token });
+}
+
+export async function listReportDefinitions(token: Token) {
+  return apiRequest<unknown>(`${gatewayUrl(report, report.apiPath)}/definitions`, { token });
 }
 
 export async function adminDashboard(token: Token) {
   return apiRequest<unknown>(`${gatewayUrl(admin, admin.apiPath)}/dashboard`, { token });
+}
+
+export async function adminSettings(token: Token) {
+  return apiRequest<unknown>(`${gatewayUrl(admin, admin.apiPath)}/settings`, { token });
+}
+
+export async function adminFeatureFlags(token: Token) {
+  return apiRequest<unknown>(`${gatewayUrl(admin, admin.apiPath)}/feature-flags`, { token });
 }
 
 export async function listInventory(token: Token) {

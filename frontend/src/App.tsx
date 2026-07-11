@@ -6,6 +6,8 @@ import { DashboardPage } from './pages/DashboardPage';
 import { E2EFlowPage } from './pages/E2EFlowPage';
 import { MarketplacePage } from './pages/MarketplacePage';
 import { PlatformPage } from './pages/PlatformPage';
+import { ServicesPage } from './pages/ServicesPage';
+import { SetupGuidePage } from './pages/SetupGuidePage';
 
 export default function App() {
   return (
@@ -14,6 +16,8 @@ export default function App() {
         <Routes>
           <Route element={<Layout />}>
             <Route index element={<DashboardPage />} />
+            <Route path="setup" element={<SetupGuidePage />} />
+            <Route path="services" element={<ServicesPage />} />
             <Route path="e2e" element={<E2EFlowPage />} />
             <Route path="catalog" element={<CatalogPage />} />
             <Route path="marketplace" element={<MarketplacePage />} />
