@@ -59,13 +59,15 @@
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: none
+      ddl-auto: validate
     properties:
       hibernate:
         jdbc:
           time_zone: UTC
   flyway:
-    enabled: false
+    enabled: ${FLYWAY_ENABLED:true}
+    locations: classpath:db/migration
+    baseline-on-migrate: true
 
 server:
   port: ${IDENTITY_SERVICE_PORT:8081}
@@ -127,6 +129,26 @@ marketplace:
     version: v1
   security:
     enabled: ${MARKETPLACE_SECURITY_ENABLED:true}
+  notification:
+    base-url: ${NOTIFICATION_SERVICE_URL:http://localhost:8089}
+  auth:
+    otp:
+      length: 6
+      ttl-seconds: 300
+      max-attempts: 5
+      resend-cooldown-seconds: 30
+      dev-expose-otp: ${AUTH_DEV_EXPOSE_OTP:true}
+      sms-enabled: ${AUTH_SMS_ENABLED:false}
+    pin:
+      length: 6
+      max-failed-attempts: 5
+      lock-duration-seconds: 900
+    qr:
+      ttl-seconds: 300
+      payload-prefix: "karatkart://qr-login?sessionId="
+    token:
+      verification-ttl-seconds: 1800
+      access-ttl-seconds: 86400
   kafka:
     enabled: ${KAFKA_ENABLED:true}
     topics:

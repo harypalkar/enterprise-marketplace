@@ -5,6 +5,13 @@ interface FlowState {
   buyerId?: string;
   categoryId?: string;
   productId?: string;
+  otpSessionId?: string;
+  otpCode?: string;
+  verificationToken?: string;
+  mobileUserId?: string;
+  accessToken?: string;
+  qrSessionId?: string;
+  mobileNumber?: string;
 }
 
 interface AppContextValue {

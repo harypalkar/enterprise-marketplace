@@ -32,7 +32,12 @@ public class GatewaySecurityConfig {
                                     "/swagger-ui/**",
                                     "/v3/api-docs/**",
                                     "/webjars/**",
-                                    "/api/v1/bootstrap/**")
+                                    "/api/v1/bootstrap/**",
+                                    "/api/identity/api/v1/auth/otp/**",
+                                    "/api/identity/api/v1/auth/pin/**",
+                                    "/api/identity/api/v1/auth/user/**",
+                                    "/api/identity/api/v1/auth/qr/**",
+                                    "/api/identity/api/v1/bootstrap/**")
                             .permitAll()
                             .anyExchange()
                             .authenticated())

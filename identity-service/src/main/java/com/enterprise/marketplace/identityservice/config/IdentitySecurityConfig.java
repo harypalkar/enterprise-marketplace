@@ -36,12 +36,20 @@ public class IdentitySecurityConfig {
 
         if (securityEnabled) {
             http.authorizeHttpRequests(auth -> auth.requestMatchers(
+                                    "/",
                                     "/actuator/**",
                                     "/swagger-ui.html",
                                     "/swagger-ui/**",
                                     "/v3/api-docs/**",
                                     "/api/v1/bootstrap/**",
-                                    "/api/v1/infrastructure/**")
+                                    "/api/v1/infrastructure/**",
+                                    "/api/v1/auth/otp/**",
+                                    "/api/v1/auth/pin/verify",
+                                    "/api/v1/auth/qr/create",
+                                    "/api/v1/auth/qr/*",
+                                    "/api/v1/auth/user/**",
+                                    "/api/v1/auth/pin/create",
+                                    "/api/v1/auth/qr/*/confirm")
                             .permitAll()
                             .requestMatchers("/api/v1/admin/**")
                             .hasRole(MarketplaceRoles.ADMIN)

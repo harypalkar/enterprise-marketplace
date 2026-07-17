@@ -11,15 +11,19 @@ import {
   checkAiHealth,
   checkElasticsearchHealth,
   checkServiceHealth,
+  confirmQrSession,
   createBuyer,
   createCategory,
   createInventory,
+  createPin,
   createPlan,
   createPricing,
   createProduct,
+  createQrSession,
   createSeller,
   createWorkflow,
   getProductById,
+  getQrSession,
   listAudits,
   listBuyers,
   listCategories,
@@ -33,8 +37,15 @@ import {
   listSellers,
   listSubscriptions,
   listWorkflows,
+  resendOtp,
   searchProductsElasticsearch,
   sendNotification,
+  sendOtp,
+  setUserDetailsBusiness,
+  setUserDetailsIndividual,
+  setUserType,
+  verifyOtp,
+  verifyPin,
 } from '../api/services';
 import { gatewayUrl, SERVICES } from '../types/api';
 import { action, ResultStack, ServiceCard, type ServiceAction } from '../components/ServiceTester';
@@ -59,6 +70,98 @@ export function ServicesPage() {
       );
 
     return [
+      {
+        serviceId: 'identity',
+        name: 'Identity / Mobile Auth',
+        port: 8081,
+        description: 'KaratKart OTP, user onboarding, PIN, and web QR login',
+        actions: [
+          health('identity'),
+          action('otp-send', 'Send OTP', 'POST /auth/otp/send', gw('identity', '/api/v1/auth/otp/send'), async () => {
+            const mobile = `9${suffix.padStart(9, '0')}`.slice(0, 10);
+            const res = await sendOtp(mobile);
+            setFlow({
+              otpSessionId: res.data.sessionId,
+              otpCode: res.data.otp,
+              mobileNumber: res.data.mobileNumber,
+            });
+            return res;
+          }),
+          action('otp-resend', 'Resend OTP', 'POST /auth/otp/resend', gw('identity', '/api/v1/auth/otp/resend'), async () => {
+            if (!flow.otpSessionId) throw new Error('Send OTP first');
+            const res = await resendOtp(flow.otpSessionId);
+            setFlow({ otpSessionId: res.data.sessionId, otpCode: res.data.otp });
+            return res;
+          }),
+          action('otp-verify', 'Verify OTP', 'POST /auth/otp/verify', gw('identity', '/api/v1/auth/otp/verify'), async () => {
+            if (!flow.otpSessionId || !flow.otpCode) throw new Error('Send OTP first (need sessionId + otp)');
+            const res = await verifyOtp(flow.otpSessionId, flow.otpCode);
+            setFlow({
+              verificationToken: res.data.verificationToken,
+              mobileUserId: res.data.userId,
+            });
+            return res;
+          }),
+          action('user-type', 'Set User Type', 'POST /auth/user/type (INDIVIDUAL)', gw('identity', '/api/v1/auth/user/type'), async () => {
+            if (!flow.verificationToken) throw new Error('Verify OTP first');
+            const res = await setUserType(flow.verificationToken, 'INDIVIDUAL');
+            setFlow({ mobileUserId: res.data.userId });
+            return res;
+          }),
+          action(
+            'user-details',
+            'Set User Details',
+            'POST /auth/user/details (individual)',
+            gw('identity', '/api/v1/auth/user/details'),
+            async () => {
+              if (!flow.verificationToken) throw new Error('Verify OTP first');
+              return setUserDetailsIndividual(flow.verificationToken, suffix);
+            },
+          ),
+          action(
+            'user-details-biz',
+            'Set Business Details',
+            'POST /auth/user/details (business) — set type BUSINESS first in a fresh flow',
+            gw('identity', '/api/v1/auth/user/details'),
+            async () => {
+              if (!flow.verificationToken) throw new Error('Verify OTP first');
+              await setUserType(flow.verificationToken, 'BUSINESS');
+              return setUserDetailsBusiness(flow.verificationToken, suffix);
+            },
+          ),
+          action('pin-create', 'Create PIN', 'POST /auth/pin/create (258147)', gw('identity', '/api/v1/auth/pin/create'), async () => {
+            if (!flow.verificationToken) throw new Error('Complete OTP + user details first');
+            const res = await createPin(flow.verificationToken);
+            setFlow({ accessToken: res.data.accessToken, mobileUserId: res.data.userId });
+            return res;
+          }),
+          action('pin-verify', 'Verify PIN', 'POST /auth/pin/verify', gw('identity', '/api/v1/auth/pin/verify'), async () => {
+            if (!flow.mobileNumber) throw new Error('Send OTP first to capture mobileNumber');
+            const res = await verifyPin(flow.mobileNumber);
+            setFlow({ accessToken: res.data.accessToken, mobileUserId: res.data.userId });
+            return res;
+          }),
+          action('qr-create', 'Create QR', 'POST /auth/qr/create', gw('identity', '/api/v1/auth/qr/create'), async () => {
+            const res = await createQrSession(`web-${suffix}`);
+            setFlow({ qrSessionId: res.data.qrSessionId });
+            return res;
+          }),
+          action('qr-poll', 'Poll QR', 'GET /auth/qr/{id}', gw('identity', '/api/v1/auth/qr/{id}'), async () => {
+            if (!flow.qrSessionId) throw new Error('Create QR first');
+            return getQrSession(flow.qrSessionId);
+          }),
+          action(
+            'qr-confirm',
+            'Confirm QR',
+            'POST /auth/qr/{id}/confirm',
+            gw('identity', '/api/v1/auth/qr/{id}/confirm'),
+            async () => {
+              if (!flow.qrSessionId || !flow.accessToken) throw new Error('Create QR and Create/Verify PIN first');
+              return confirmQrSession(flow.qrSessionId, flow.accessToken);
+            },
+          ),
+        ],
+      },
       {
         serviceId: 'seller',
         name: 'Seller Service',
@@ -314,6 +417,10 @@ export function ServicesPage() {
           <div><span>Buyer ID</span><code>{flow.buyerId ?? '—'}</code></div>
           <div><span>Category ID</span><code>{flow.categoryId ?? '—'}</code></div>
           <div><span>Product ID</span><code>{flow.productId ?? '—'}</code></div>
+          <div><span>OTP Session</span><code>{flow.otpSessionId ?? '—'}</code></div>
+          <div><span>Verification Token</span><code>{flow.verificationToken ?? '—'}</code></div>
+          <div><span>Mobile Access Token</span><code>{flow.accessToken ?? '—'}</code></div>
+          <div><span>QR Session</span><code>{flow.qrSessionId ?? '—'}</code></div>
         </div>
       </section>
 

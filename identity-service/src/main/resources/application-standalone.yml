@@ -1,0 +1,45 @@
+# Standalone profile — in-memory H2 when PostgreSQL is unavailable (local smoke tests).
+# Auth sessions use in-memory store when Redis autoconfig is excluded.
+spring:
+  datasource:
+    url: jdbc:h2:mem:identity_service;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  flyway:
+    enabled: false
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+      - org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+
+marketplace:
+  security:
+    enabled: false
+  kafka:
+    enabled: false
+  auth:
+    session-store: memory
+    otp:
+      dev-expose-otp: true
+      sms-enabled: false
+
+management:
+  endpoint:
+    health:
+      show-details: always
+      group:
+        readiness:
+          include: readinessState,ping
+  health:
+    redis:
+      enabled: false
+    kafka:
+      enabled: false

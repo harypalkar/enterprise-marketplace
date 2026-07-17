@@ -2,13 +2,14 @@ import { NavLink, Outlet } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 
 const NAV = [
-  { to: '/', label: 'Dashboard' },
-  { to: '/setup', label: 'Setup Guide' },
-  { to: '/services', label: 'All Services' },
-  { to: '/e2e', label: 'E2E Flow' },
-  { to: '/catalog', label: 'Catalog' },
-  { to: '/marketplace', label: 'Marketplace' },
-  { to: '/platform', label: 'Platform' },
+  { to: '/console', label: 'Dashboard' },
+  { to: '/console/setup', label: 'Setup Guide' },
+  { to: '/console/services', label: 'All Services' },
+  { to: '/console/e2e', label: 'E2E Flow' },
+  { to: '/console/catalog', label: 'Catalog' },
+  { to: '/console/marketplace', label: 'Marketplace APIs' },
+  { to: '/console/platform', label: 'Platform' },
+  { to: '/', label: '← KaratKart Site' },
 ];
 
 export function Layout() {
@@ -26,7 +27,7 @@ export function Layout() {
         </div>
         <nav>
           {NAV.map((item) => (
-            <NavLink key={item.to} to={item.to} end={item.to === '/'}>
+            <NavLink key={item.to} to={item.to} end={item.to === '/console' || item.to === '/'}>
               {item.label}
             </NavLink>
           ))}

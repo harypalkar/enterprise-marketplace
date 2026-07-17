@@ -17,6 +17,7 @@ export interface ServiceDefinition {
 
 export const SERVICES: ServiceDefinition[] = [
   { id: 'gateway', name: 'Gateway', gatewayPrefix: '', apiPath: '/api/v1/bootstrap', bootstrapPath: '/api/v1/bootstrap/health', port: 8080 },
+  { id: 'identity', name: 'Identity', gatewayPrefix: '/api/identity', apiPath: '/api/v1/auth', bootstrapPath: '/api/v1/bootstrap/health', port: 8081 },
   { id: 'product', name: 'Product', gatewayPrefix: '/api/products', apiPath: '/api/v1/products', bootstrapPath: '/api/v1/bootstrap/health', port: 8082 },
   { id: 'seller', name: 'Seller', gatewayPrefix: '/api/sellers', apiPath: '/api/v1/sellers', bootstrapPath: '/api/v1/bootstrap/health', port: 8083 },
   { id: 'buyer', name: 'Buyer', gatewayPrefix: '/api/buyers', apiPath: '/api/v1/buyers', bootstrapPath: '/api/v1/bootstrap/health', port: 8084 },
@@ -33,11 +34,14 @@ export const SERVICES: ServiceDefinition[] = [
   { id: 'admin', name: 'Admin', gatewayPrefix: '/api/admin', apiPath: '/api/v1/admin', bootstrapPath: '/api/v1/bootstrap/health', port: 8095 },
 ];
 
+/** Optional absolute API origin for production (e.g. public gateway). Empty in local Vite. */
+const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, '') ?? '';
+
 export function gatewayUrl(service: ServiceDefinition, path: string): string {
   if (!service.gatewayPrefix) {
-    return path;
+    return `${API_BASE}${path}`;
   }
-  return `${service.gatewayPrefix}${path}`;
+  return `${API_BASE}${service.gatewayPrefix}${path}`;
 }
 
 export function newIdempotencyKey(): string {

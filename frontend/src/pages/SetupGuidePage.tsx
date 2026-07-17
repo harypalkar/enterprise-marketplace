@@ -13,7 +13,7 @@ export function SetupGuidePage() {
         <pre>{`cd scripts
 .\\start-gateway.ps1`}</pre>
         <p><strong>Check:</strong> <a href="http://localhost:9080/actuator/health" target="_blank" rel="noreferrer">http://localhost:9080/actuator/health</a></p>
-        <p className="warn-text">Port 8080 on your PC is used by another app. Marketplace gateway must use port 9080.</p>
+        <p className="warn-text">If port 9080 is already in use, gateway is likely already running. Check http://localhost:9080/actuator/health — do NOT start twice. To restart: <code>.\stop-gateway.ps1</code> then <code>.\start-gateway.ps1</code></p>
       </section>
 
       <section className="panel">
@@ -28,19 +28,24 @@ export function SetupGuidePage() {
         <h2>Terminal 3 — Frontend</h2>
         <pre>{`cd frontend
 npm install
-npm run dev`}</pre>
+npm run dev
+
+# OR from scripts folder:
+cd scripts
+.\\start-frontend.ps1`}</pre>
         <p><strong>Open:</strong> <a href="http://localhost:5173" target="_blank" rel="noreferrer">http://localhost:5173</a></p>
+        <p className="warn-text">Use <code>cd frontend</code> from the enterprise-marketplace folder — NOT <code>cd ..\\frontend</code>.</p>
       </section>
 
       <section className="panel">
         <h2>Test order (as a user)</h2>
         <ol className="setup-steps">
-          <li><span>1</span><div><strong>Dashboard</strong><p><a href="http://localhost:5173/">http://localhost:5173/</a> — Refresh, confirm services UP</p></div></li>
-          <li><span>2</span><div><strong>All Services</strong><p><a href="http://localhost:5173/services">http://localhost:5173/services</a> — Test each service one by one</p></div></li>
-          <li><span>3</span><div><strong>E2E Flow</strong><p><a href="http://localhost:5173/e2e">http://localhost:5173/e2e</a> — Click Run All Remaining</p></div></li>
-          <li><span>4</span><div><strong>Catalog</strong><p><a href="http://localhost:5173/catalog">http://localhost:5173/catalog</a> — Seller → Category → Product</p></div></li>
-          <li><span>5</span><div><strong>Marketplace</strong><p><a href="http://localhost:5173/marketplace">http://localhost:5173/marketplace</a> — Buyer, Search, AI</p></div></li>
-          <li><span>6</span><div><strong>Platform</strong><p><a href="http://localhost:5173/platform">http://localhost:5173/platform</a> — Workflow, Notification, Audit, Admin</p></div></li>
+          <li><span>1</span><div><strong>KaratKart site</strong><p><a href="http://localhost:5173/">http://localhost:5173/</a> — Luxury diamond storefront</p></div></li>
+          <li><span>2</span><div><strong>API Console</strong><p><a href="http://localhost:5173/console">http://localhost:5173/console</a> — Dashboard health check</p></div></li>
+          <li><span>3</span><div><strong>All Services</strong><p><a href="http://localhost:5173/console/services">http://localhost:5173/console/services</a> — Test each service</p></div></li>
+          <li><span>4</span><div><strong>E2E Flow</strong><p><a href="http://localhost:5173/console/e2e">http://localhost:5173/console/e2e</a> — Click Run All Remaining</p></div></li>
+          <li><span>5</span><div><strong>Catalog</strong><p><a href="http://localhost:5173/console/catalog">http://localhost:5173/console/catalog</a> — Seller → Category → Product</p></div></li>
+          <li><span>6</span><div><strong>Platform</strong><p><a href="http://localhost:5173/console/platform">http://localhost:5173/console/platform</a> — Workflow, Notification, Audit</p></div></li>
         </ol>
       </section>
 

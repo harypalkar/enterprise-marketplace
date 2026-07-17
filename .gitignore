@@ -94,3 +94,9 @@ tmp/
 temp/
 *.tmp
 *.bak
+
+# Frontend
+frontend/dist/
+frontend/node_modules/
+frontend/*.tsbuildinfo
+.vercel/

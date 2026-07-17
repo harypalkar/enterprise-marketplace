@@ -15,6 +15,7 @@ const audit = SERVICES.find((s) => s.id === 'audit')!;
 const subscription = SERVICES.find((s) => s.id === 'subscription')!;
 const report = SERVICES.find((s) => s.id === 'report')!;
 const admin = SERVICES.find((s) => s.id === 'admin')!;
+const identity = SERVICES.find((s) => s.id === 'identity')!;
 
 type Token = string | undefined;
 
@@ -350,4 +351,138 @@ export async function listBuyers(token: Token) {
 
 export async function listCategories(token: Token) {
   return apiRequest<unknown>(`${gatewayUrl(category, category.apiPath)}?page=0&size=10`, { token });
+}
+
+export async function sendOtp(mobileNumber: string) {
+  return apiRequest<{
+    sessionId: string;
+    expiresInSeconds: number;
+    otp?: string;
+    countryCode: string;
+    mobileNumber: string;
+  }>(gatewayUrl(identity, '/api/v1/auth/otp/send'), {
+    method: 'POST',
+    body: { countryCode: '+91', mobileNumber },
+  });
+}
+
+export async function resendOtp(sessionId: string) {
+  return apiRequest<{ sessionId: string; otp?: string }>(gatewayUrl(identity, '/api/v1/auth/otp/resend'), {
+    method: 'POST',
+    body: { sessionId },
+  });
+}
+
+export async function verifyOtp(sessionId: string, otp: string) {
+  return apiRequest<{
+    verificationToken: string;
+    isNewUser: boolean;
+    userId?: string;
+    mobileNumber: string;
+  }>(gatewayUrl(identity, '/api/v1/auth/otp/verify'), {
+    method: 'POST',
+    body: { sessionId, otp },
+  });
+}
+
+export async function setUserType(verificationToken: string, userType: 'INDIVIDUAL' | 'BUSINESS') {
+  return apiRequest<{ userId: string; userType: string }>(gatewayUrl(identity, '/api/v1/auth/user/type'), {
+    method: 'POST',
+    body: { verificationToken, userType },
+  });
+}
+
+export async function setUserDetails(
+  verificationToken: string,
+  userType: 'INDIVIDUAL' | 'BUSINESS',
+  details: {
+    fullName?: string;
+    email: string;
+    companyName?: string;
+    website?: string;
+    gstNumber?: string;
+    city?: string;
+    country?: string;
+  },
+) {
+  return apiRequest<unknown>(gatewayUrl(identity, '/api/v1/auth/user/details'), {
+    method: 'POST',
+    body: {
+      verificationToken,
+      ...(userType === 'INDIVIDUAL'
+        ? { fullName: details.fullName, email: details.email }
+        : {
+            companyName: details.companyName,
+            gstNumber: details.gstNumber,
+            email: details.email,
+            city: details.city ?? 'Mumbai',
+            country: details.country ?? 'India',
+            website: details.website,
+          }),
+    },
+  });
+}
+
+export async function setUserDetailsIndividual(verificationToken: string, suffix: string) {
+  return setUserDetails(verificationToken, 'INDIVIDUAL', {
+    fullName: `UI User ${suffix}`,
+    email: `user.${suffix}@karatkart.test`,
+  });
+}
+
+export async function setUserDetailsBusiness(verificationToken: string, suffix: string) {
+  return setUserDetails(verificationToken, 'BUSINESS', {
+    companyName: `UI Biz ${suffix}`,
+    gstNumber: '27AABCU9603R1ZM',
+    email: `biz.${suffix}@karatkart.test`,
+    city: 'Mumbai',
+    country: 'India',
+    website: 'https://karatkart.test',
+  });
+}
+
+export async function createPin(verificationToken: string, pin = '258147') {
+  return apiRequest<{ accessToken: string; userId: string; userType: string }>(
+    gatewayUrl(identity, '/api/v1/auth/pin/create'),
+    {
+      method: 'POST',
+      body: { verificationToken, pin, confirmPin: pin },
+    },
+  );
+}
+
+export async function verifyPin(mobileNumber: string, pin = '258147') {
+  return apiRequest<{ accessToken: string; userId: string; userType: string }>(
+    gatewayUrl(identity, '/api/v1/auth/pin/verify'),
+    {
+      method: 'POST',
+      body: { countryCode: '+91', mobileNumber, pin },
+    },
+  );
+}
+
+export async function createQrSession(deviceId = 'web-ui') {
+  return apiRequest<{ qrSessionId: string; qrPayload: string; status: string; expiresInSeconds: number }>(
+    gatewayUrl(identity, '/api/v1/auth/qr/create'),
+    {
+      method: 'POST',
+      body: { deviceId },
+    },
+  );
+}
+
+export async function getQrSession(qrSessionId: string) {
+  return apiRequest<{ qrSessionId: string; status: string; accessToken?: string }>(
+    gatewayUrl(identity, `/api/v1/auth/qr/${qrSessionId}`),
+  );
+}
+
+export async function confirmQrSession(qrSessionId: string, accessToken: string) {
+  return apiRequest<{ qrSessionId: string; status: string; accessToken?: string }>(
+    gatewayUrl(identity, `/api/v1/auth/qr/${qrSessionId}/confirm`),
+    {
+      method: 'POST',
+      body: { accessToken },
+    },
+  );
 }
